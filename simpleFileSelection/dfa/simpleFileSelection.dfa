@@ -1,0 +1,4 @@
+#! UG/KBE 17.0
+DefClass:  simpleFileSelection(ug_base_part);
+
+   (string parameter uncached)  inputData_file:           "";

@@ -1,0 +1,61 @@
+#! UG/KBE 17.0
+DefClass: DraftingBorder (ug_base_part);
+
+# ----------------------------------------------------------------------------
+# Function: Area and Mass Expression Creation
+#
+# Purpose:  The user will select either a Face(s) or Solid Body(s) that will create
+#           a dynamically updated expression
+#
+# Author:   Dave Tolsma
+#
+# ----------------------------------------------------------------------------
+#
+#   DATE    CHG  SYSTEM ENGINEER         DESCRIPTION            
+#  ______   ___  ______________________ _______________________________
+#  12AU02   000  David A. Tolsma	 INITIAL RELEASE v1.0  
+#
+# ----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
+# EMBED THE DFA FILE IN THE UG PART
+
+   (list Uncached) saveClassList: {DraftingBorder};
+   (boolean) saveClass?: TRUE;
+    
+# ----------------------------------------------------------------------------
+# EDIT EXISTING CLASS VIA THE MENU / TOOLBAR
+
+   (Name)   APPLY_STATE:   Edit;
+   (String) APPLY_NAME:   "Border";
+   
+   (boolean) ok_sens:    if (empty?(selectedfaces:) = TRUE ) & (empty?(selectedbody:) = TRUE ) Then FALSE else TRUE; # THIS WILL TOGGLE THE OK BUTTON (SELECTABLE OR NOT)
+   (boolean) apply_sens: if (empty?(selectedfaces:) = TRUE ) & (empty?(selectedbody:) = TRUE ) Then FALSE else TRUE; # THIS WILL TOGGLE THE APPLY BUTTON (SELECTABLE OR NOT)
+
+(child) lowerHorizontal:
+{
+  class,        ug_line;
+  Start_Point, Point(0,0,0);
+  End_Point,   Point(17,0,0);
+};
+
+(child) rightVertical:
+{
+  class,        ug_line;
+  Start_Point, Point(17,0,0);
+  End_Point,   Point(17,11,0);
+};
+
+(child) leftVertical:
+{
+  class,        ug_line;
+  Start_Point, Point(0,0,0);
+  End_Point,   Point(0,11,0);
+};
+
+(child) upperHorizontal:
+{
+  class,        ug_line;
+  Start_Point, Point(0,11,0);
+  End_Point,   Point(17,11,0);
+};

@@ -1,0 +1,14 @@
+!
+!  Unigraphics Application Toolbar 
+!
+! 
+!
+
+TITLE   UGS KF Examples
+VERSION 170
+DOCK TOP
+RELOAD
+
+BUTTON KF_APPLICATION_ONE
+LABEL  KF Feature Example
+BITMAP pt_curve_datum16

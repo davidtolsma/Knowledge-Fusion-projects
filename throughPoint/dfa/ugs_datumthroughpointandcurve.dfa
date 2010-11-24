@@ -1,0 +1,36 @@
+#! UG/KF 19.0
+
+DefClass: ugs_datumThroughPointAndCurve(%nx_application);
+
+    # ----------  select and adopt parent geometry
+    (any parameter modifiable) selPoint:      {};
+    (list)                     selPoint_Mask: { point };
+    (instance)                 thePoint:     ug_adoptObject( selPoint: );
+
+    (any parameter modifiable) selCurve:      {};
+    (list)                     selCurve_Mask: { curve, edge };
+    (instance)                 theCurve:     ug_adoptObject( selCurve: );
+
+    # -------------- datum parameters
+    (point)  Thru_Point: thePoint:Position:;
+    (vector) Direction:  ug_curve_askTangent( theCurve:, 
+                                              ug_curve_askParameterAtPoint(theCurve:,
+                                                                           Thru_Point:));                                                                     
+
+    # --------------------  create new datum
+    (child) fancyDatum: 
+    {
+        class, ug_datum_plane;
+        inMntTree?, false;
+    };
+
+    # -------------------  KF Feature overrides
+
+    #define the icon shown in MNT
+    (string) icon_name:     "pt_curve_datum16.bmp";
+
+    #define the feature name shown in MNT
+    (string) application_name:      "pointCurveDatum";
+
+    #tell UG which entities are parents of this feature
+    (list)   input_geometries: {selPoint, selCurve};

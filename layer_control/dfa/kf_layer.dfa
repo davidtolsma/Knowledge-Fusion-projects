@@ -1,0 +1,119 @@
+#! UG/KF 17.0
+
+#+
+---------------------------------------------------------------------------------
+	Sets Layer visibility
+
+	Input : (Integer) 	Layer (1-255)
+
+	Input : (String) 		Visibility (work, selectable, visible, invisible)
+
+					Error is generated if the input is not valid.
+
+	Return: (Boolean)		- TRUE if the layer is set, 
+                           	  otherwise, FALSE.
+
+	Example: (Boolean) SetLayer: SetLayer( 2, "work");
+---------------------------------------------------------------------------------
+#-
+
+Defun: SetLayer( Integer $layer, String $status; String ($lib; "kf_layer");
+				String ($func_name; "KF_set_layer" ))
+  			@{ CFunc("UF_KF_invoke_user_function"; "libufun"); } Boolean;
+
+
+#+
+---------------------------------------------------------------------------------
+	Sets a Range of Layers visibility
+
+	Input : (List) 		{$low(Integer), $high(Integer)}
+
+	Input : (String) 		Visibility (work, selectable, visible, invisible)
+
+					Error is generated if the input is not valid.
+
+	Return: (Boolean)		- TRUE if the layer is set, 
+					  otherwise, FALSE.
+
+	Example: (Boolean) SetLayerRange: SetLayer_Range( {10 ,20}, "visible");
+---------------------------------------------------------------------------------
+#-
+
+Defun: SetLayer_Range(List $range, String $visibility)
+@{
+	Loop {
+       	For $i From nth(1,$range) To nth(2,$range) By 1;
+        	For $error is SetLayer($i, $visibility);
+		
+		return is $error;
+	  	};
+		 
+} Boolean; 
+
+
+#+
+---------------------------------------------------------------------------------
+	Get a Layers visibility
+
+	Input : (Integer) 	Layer (1-255)
+
+					Error is generated if the input is not valid.
+
+	Return: (String)		- The layers visibility, 
+					  (work, selectable, visible, invisible)
+
+	Example: (String) GetLayer: GetLayer( 2 );
+---------------------------------------------------------------------------------
+#-
+Defun: GetLayer( Integer $layer; String ($lib; "kf_layer"); 
+    String ($func_name; "KF_get_layer" ))
+  @{ CFunc("UF_KF_invoke_user_function"; "libufun"); } String;
+
+
+#+
+---------------------------------------------------------------------------------
+	Gets a Range of Layers visibility
+
+	Input : (List) 		{$low(Integer), $high(Integer)}
+
+					Error is generated if the input is not valid.
+
+	Return: (List)		- List of Lists {layer(Integer), visibility(String)}
+					visibility (work, selectable, visible, invisible)
+
+	Example: (List) GetLayer_Range: GetLayer_Range( {10, 20} );
+---------------------------------------------------------------------------------
+#-  
+
+Defun: GetLayer_Range(List $range)
+@{
+	Loop {
+   	    	For $i From nth(1,$range) To nth(2,$range) By 1;
+     		For $status is GetLayer($i);
+        
+      	append{ {$i, $status} };
+    		};
+} List;
+
+
+#+
+---------------------------------------------------------------------------------
+	Gets all Layers visibility
+
+	Return: (List)		- List of Lists {layer(Integer), visibility(String)}
+					visibility (work, selectable, visible, invisible)
+
+	Example: (List) GetLayer_All: GetLayer_All();
+---------------------------------------------------------------------------------
+#-  
+
+Defun: GetLayer_All()
+@{
+	Loop{ for $i from 1 to 256 by 1;
+		for $layer is $i;
+		for $status is GetLayer($i);	        
+	        
+	      append{ { $i, $status } };
+	    }; 
+} List;
+

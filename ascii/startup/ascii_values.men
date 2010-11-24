@@ -1,0 +1,16 @@
+VERSION 120
+EDIT UG_GATEWAY_MAIN_MENUBAR
+
+! *************** DEFINE MAIN MENU ENTRY POINT ***************
+
+AFTER UG_TOOLS_CUSTOMIZE
+
+  BUTTON ASCII_VALUES
+  LABEL Ascii Values
+  BITMAP pointset
+  ACTIONS ascii_values.dfa
+
+END_OF_AFTER
+
+
+

@@ -1,0 +1,16 @@
+#! NX/KF 3.0
+
+DefClass: partAttributeName (ug_base_part);
+
+(String Modifiable) PartName: ug_askCurrentWorkPart();
+
+(Integer Modifiable) setPartNameAttribute: ug_setAttrValue_(
+               "", //Part Name
+               "PART_ATTRIBUTE", // Attribute Type
+               "PART_NAME", // Attribute Name
+               PartName: // Attribute Value
+);
+
+(list) demandValue: {
+    setPartNameAttribute:
+};

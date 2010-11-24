@@ -1,0 +1,101 @@
+#! UG/KF 17.0
+
+## Routing main class definition
+DefClass: fillet(ug_base_part);
+
+# EMBED THE DFA FILE IN THE UG PART
+    (list Uncached) saveClassList: {fillet};
+    (boolean)       saveClass?:    TRUE;
+
+(point parameter) p1: Point(0,0,0);
+(point parameter) p2: Point(4,0,3);
+(point parameter) p3: Point(4,4,0);
+
+(number parameter) r: 1;
+#+
+(child) line1:
+{
+  class,        ug_line;
+  Start_Point, p1:;
+  End_Point,   f1:;
+};
+
+
+(child) line2:
+{
+  class,        ug_line;
+  Start_Point, f2:;
+  End_Point,   p3:;
+};
+#-
+(number) hb: ba:/2;
+
+(number) d: r:/tan(hb:);
+
+(vector) v1: vector(LocalX(p1:)-LocalX(p2:),LocalY(p1:)-LocalY(p2:),LocalZ(p1:)-LocalZ(p2:));
+
+(vector) v2: p3:-p2:;
+
+
+(vector) nv1: unitize(v1:);
+(vector) nv2: unitize(v2:);
+
+
+(point) f1: p2:+ (d:*nv1:);
+(point) f2: p2:+ (d:*nv2:);
+
+#+
+(child) fp1:
+{
+  class,     ug_point;
+  Position, f1:;
+};
+
+
+(child) fp2:
+{
+  class,     ug_point;
+  Position, f2:;
+};
+#-
+
+(point) c1: point((LocalX(f1:)+LocalX(f2:))/2,(LocalY(f1:)+LocalY(f2:))/2,(LocalZ(f1:)+LocalZ(f2:))/2);
+
+#+(child) pseudo:
+{
+  class,     ug_point;
+  Position, c1:;
+};
+#-
+(vector) vc1: vector(LocalX(c1:)-LocalX(p2:),LocalY(c1:)-LocalY(p2:),LocalZ(c1:)-LocalZ(p2:));
+(vector) nvc1: unitize(vc1:);
+
+(number) dfc: r:/sin(hb:);
+
+(point) fc: p2:+ (dfc:*nvc1:);
+
+#+
+(child) fcp:
+{
+  class,     ug_point;
+  Position, fc:;
+};
+#-
+
+(number) ba: angle2Vectors(v1:; v2:;v1:*v2:);
+
+(frame) fxyz: frame3Point(fc:,f1:,f2:);
+
+(vector) xax: unitize (vector(LocalX(f1:)-LocalX(fc:),LocalY(f1:)-LocalY(fc:),LocalZ(f1:)-LocalZ(fc:)));
+(vector) yax: unitize (vector(LocalX(f2:)-LocalX(fc:),LocalY(f2:)-LocalY(fc:),LocalZ(f2:)-LocalZ(fc:)));
+
+(child) arc1:
+{
+  class,        ug_arc;
+  Radius,      r:;
+  Start_Angle, 0;
+  End_Angle,   180-ba:;
+  Center,      fc:;
+  X_Axis,      xax:;
+  Y_Axis,      yax:;
+};

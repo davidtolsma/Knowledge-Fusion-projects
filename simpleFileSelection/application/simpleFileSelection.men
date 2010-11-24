@@ -1,0 +1,23 @@
+VERSION 120
+EDIT UG_GATEWAY_MAIN_MENUBAR
+
+! *************** DEFINE MAIN MENU ENTRY POINT ***************
+
+AFTER UG_TOOLS_CUSTOMIZE
+
+  CASCADE_BUTTON KF_EXAMPLES
+  LABEL KF Examples
+  
+END_OF_AFTER
+
+
+! *************** MAIN MENU ITEMS ***************
+
+MENU KF_EXAMPLES
+
+  BUTTON SIMPLE_FILE_SELECTION
+  LABEL Simple File Selection
+  ACTIONS simpleFileSelection.dfa
+  
+END_OF_MENU
+

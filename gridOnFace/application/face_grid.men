@@ -1,0 +1,16 @@
+VERSION 120
+EDIT UG_GATEWAY_MAIN_MENUBAR
+
+! *************** DEFINE MAIN MENU ENTRY POINT ***************
+
+AFTER UG_TOOLS_CUSTOMIZE
+
+  BUTTON FACE_GRID
+  LABEL Point Set on Face
+  BITMAP pointset
+  ACTIONS face_grid.dfa
+
+END_OF_AFTER
+
+
+

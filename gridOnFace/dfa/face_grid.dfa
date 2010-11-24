@@ -1,0 +1,86 @@
+#! NX/KF 3.0
+
+DefClass: face_grid (%nx_application);
+
+    # ------- Dialog parameters
+    (any parameter modifiable) selFace:      {};
+    (list)                     selFaceMask: { face };
+
+    (integer parameter modifiable) number_in_u: 10;
+    (integer parameter modifiable) number_in_v: 10;
+    
+    (integer parameter modifiable) umin: 0;
+    (integer) umin_MIN: 0;
+    (string) umin_MINL: "0%";
+    (integer) umin_MAX: umax:;
+    (string) umin_MAXL: format("%d%%", umax:);
+    (integer parameter modifiable) umax: 100;
+    (integer) umax_MIN: umin:;
+    (string) umax_MINL: format("%d%%", umin:);
+    (integer) umax_MAX: 100;
+    (string) umax_MAXL: "100%";
+    (integer parameter modifiable) vmin: 0;
+    (integer) vmin_MIN: 0;
+    (string) vmin_MINL: "0%";
+    (integer) vmin_MAX: vmax:;
+    (string) vmin_MAXL: format("%d%%", vmax:);
+    (integer parameter modifiable) vmax: 100;
+    (integer) vmax_MIN: vmin:;
+    (string) vmax_MINL: format("%d%%", vmin:);
+    (integer) vmax_MAX: 100;
+    (string) vmax_MAXL: "100%";
+
+
+    # ------- class attributes
+    
+    (instance) %theFace:     ug_adoptObject( selFace: );
+    (number) %uParamDifference: %theFace:U_End_Parameter: - %theFace:U_Start_Parameter:;
+    (number) %vParamDifference: %theFace:V_End_Parameter: - %theFace:V_Start_Parameter:;
+    (number) %uStart: %uParamDifference: * (umin:/100) + %theFace:U_Start_Parameter: ;
+    (number) %uEnd: %uParamDifference: * (umax:/100) + %theFace:U_Start_Parameter: ;
+    (number) %vStart: %vParamDifference:  * (vmin:/100) + %theFace:V_Start_Parameter: ;
+    (number) %vEnd: %vParamDifference:  * (vmax:/100) + %theFace:V_Start_Parameter: ;
+
+    (list) %pointsOnFace:
+    @{
+        $u_diff << %uEnd: - %uStart:;
+        $v_diff << %vEnd: - %vStart:;
+        $u_incr << $u_diff/(number_in_u: - 1);
+        $v_incr << $v_diff/(number_in_v: - 1);
+    
+        loop
+        {
+            for $upt from 1 to number_in_u:;
+            with $u is %uStart:;
+            for $pp is loop
+            {
+                for $vpt from 1 to number_in_v:;
+                with $v is %vStart:;
+                collect (nth(1,ug_face_evaluate(%theFace:,{$u,$v})));
+                for $v is $v + $v_incr;
+            };
+            for $num_in_loop is length($pp);
+            for $u is $u + $u_incr;        
+            if($num_in_loop > 0) Append $pp;
+        };
+    };
+    
+    # ------- class children
+    
+    (child list) %grid:
+    {
+        class, ug_point; 
+        quantity, length(%pointsOnFace:); 
+        position, nth(child:index:, %pointsOnFace:); 
+    }; 
+
+    # ------- %nx_application overrides
+
+    #define the icon shown in MNT
+    (string) icon_name: "thrupoints";
+
+    #define the feature name shown in MNT
+    (string) application_name: "FaceGrid";
+
+    #tell UG which entities are parents of this feature
+    (list) input_geometries: {selFace};

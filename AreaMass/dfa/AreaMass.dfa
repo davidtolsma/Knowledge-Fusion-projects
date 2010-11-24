@@ -1,0 +1,184 @@
+#! UG/KBE 17.0
+DefClass: AreaMass (ug_base_part);
+
+# ----------------------------------------------------------------------------
+# Function: Area and Mass Expression Creation
+#
+# Purpose:  The user will select either a Face(s) or Solid Body(s) that will create
+#           a dynamically updated expression
+#
+# Author:   Dave Tolsma
+#
+# ----------------------------------------------------------------------------
+#
+#   DATE    CHG  SYSTEM ENGINEER         DESCRIPTION            
+#  ______   ___  ______________________ _______________________________
+#  12AU02   000  David A. Tolsma	 INITIAL RELEASE v1.0
+#  14SE02   001  David A. Tolsma	 Made Pulldown menu for Part Units,
+#                                        Added Version
+#  
+#
+# ----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
+# EMBED THE DFA FILE IN THE UG PART
+
+   (list Uncached) saveClassList: {AreaMass};
+   (boolean) saveClass?: TRUE;
+    
+# ----------------------------------------------------------------------------
+# EDIT EXISTING CLASS VIA THE MENU / TOOLBAR
+
+   (Name)   APPLY_STATE:   Edit;
+   (String) APPLY_NAME:   "AreaMass";
+   
+   (boolean) ok_sens:    if (empty?(selectedfaces:) = TRUE ) & (empty?(selectedbody:) = TRUE ) Then FALSE else TRUE; # THIS WILL TOGGLE THE OK BUTTON (SELECTABLE OR NOT)
+   (boolean) apply_sens: if (empty?(selectedfaces:) = TRUE ) & (empty?(selectedbody:) = TRUE ) Then FALSE else TRUE; # THIS WILL TOGGLE THE APPLY BUTTON (SELECTABLE OR NOT)
+
+# ----------------------------------------------------------------------------
+#   
+
+    (string) menuWidth: "";
+    (string) Version: "Version 1.3";
+
+# ----------------------------------------------------------------------------
+# FACE AREA CALCULATION
+
+   (integer) isFaceSelected?: if ( empty?(selectedfaces:) = TRUE )  then 0 else 1;
+                          
+   (string parameter)   AreaUnits:      "";
+   (integer)            AreaUnits_SENS: isFaceSelected?:;
+   (list)               AreaUnits_LIST: loop{  
+                                             for $i from 1 to length(ConversionFactor:);
+                                             for $menuList is first( NTH($i,ConversionFactor:) );
+                                             collect $menuList;
+                                            };
+   (string) AreaLabel: loop{
+                          for $factor in ConversionFactor:;
+                          if (AreaUnits: = first($factor) ) return first($factor) + ".bmp";
+                          return is "";
+                         }; 
+                                            
+   (list) ConversionFactor: {                       #CONVERTS ALL VALUES TO mm
+                             {"Inches",     645.16}, 
+                             {"Feet",       92903.04},
+                             {"Millimeters", 1},
+                             {"Centimeters", 100},
+                             {"Meters",  1000000}
+                            };
+                            
+   (number) factor: 1000000 / loop{
+                          for $factor in ConversionFactor:;
+                          return is NTH(2, $factor);
+                          if (AreaUnits: = first($factor) ) return second($factor);
+                          return is 0;
+                         }; 
+
+    (integer parameter) CreateAreaExpression: 1;
+    (integer)           CreateAreaExpression_SENS: isFaceSelected?:;  
+    
+    (list parameter)  selectedfaces:      {};
+    (list)            selectedfaces_MASK: {face};    
+
+    (number)  facesPicked:           length(selectedfaces:);
+    (integer) facesPicked_SENS:      isFaceSelected?:;
+    (integer) facesPicked_FUNC_SENS: isFaceSelected?:;
+    
+    (integer parameter) SelectedFacesDisplay: -1;
+    (integer)           SelectedFacesDisplay_SENS: 0;
+    (list)              SelectedFacesDisplay_LIST: loop
+                                                       {     
+                                                       for $a from 1 to facesPicked:;     # Iterator     
+                                                       for $b is NTH($a,selectedfaces:);
+                                                       collect $b;                 # Accumulator
+                                                       };
+                                                       
+
+                                                           
+    (number)  CalculatedArea:  if (empty?(selectedfaces:) = TRUE) then 0
+                                  else loop
+                                  {     
+                                  for $a from 1 to facesPicked: By 1;    
+                                  for $b is ug_face_askArea( NTH($a,selectedfaces:) ) ;
+                                  sum $b;
+                                  } * factor:;
+   
+    (integer) calculatedarea_SENS: isFaceSelected?:;
+
+    (child) AreaExpression:
+    {
+      class,     if (CreateAreaExpression: = 0) then NULLDESIGN # WILL NOT CREATE EXPRESSION IF NO OBJECT IS SELECTED
+                 else ug_expression;
+      Value,     calculatedarea:;
+      LockRule?, TRUE;
+      GivenName, "FaceArea";
+    };
+
+
+# ----------------------------------------------------------------------------
+# BODY MASS CALCULATION
+                                         
+   (integer) isBodySelected?: if ( empty?(selectedbody:) = TRUE )  then 0 else 1;
+
+   (string parameter)   MassUnits:  "";
+   (integer)            MassUnits_SENS:  isBodySelected?:;
+   
+   (string) MassLabel: loop{
+                          for $factor in MassUnits_LIST:;
+                          if (MassUnits: = $factor) return $factor + ".bmp";
+                          return is "a";
+                         }; 
+   
+   (list) MassUnits_LIST: {                                   
+                           "Pounds_And_Inches",
+                           "Pounds_And_Feet",
+                           "Grams_And_Centimeters",
+                           "Kilograms_And_Meters"
+                          };
+    
+    (integer parameter) CreateMassExpression: 1;
+    (integer)           CreateMassExpression_SENS: isBodySelected?:;
+      
+    (list parameter) selectedbody:      {};
+    (list)           selectedbody_MASK: {solid};
+    
+    (number)  BodyPicked:           length(selectedbody:);
+    (integer) BodyPicked_SENS:      isBodySelected?:;
+    (integer) BodyPicked_FUNC_SENS: isBodySelected?:;
+    
+    
+    (list)          AllMassList:  if (empty?(selectedbody:) = TRUE) then {}
+                                  else loop
+                                  {     
+                                  for $a from 1 to BodyPicked: By 1;     # Iterator     
+                                  for $b is ug_askMassProperties( { NTH($a,selectedbody:) } , Accuracy, .99 , {.01,.01,0,0,0,0,0,0,0,0,0}, makeName(MassUnits:) ); # Assignment 
+                                  collect $b;                 # Accumulator
+                                  };
+                                  
+    (integer parameter) SelectedBodyDisplay: -1;
+    (integer)           SelectedBodyDisplay_SENS: 0;
+    (list)              SelectedBodyDisplay_LIST: loop
+                                                       {     
+                                                       for $a from 1 to BodyPicked:; 
+                                                       for $b is NTH($a,selectedbody:);
+                                                       collect $b;
+                                                       };
+                                                       
+    (number) CalculatedMass:        if (empty?(selectedbody:) = TRUE) then 0
+                                    else loop
+                                    {
+                                    for $a from 1 to BodyPicked: by 1;
+                                    for $b is  NTH(3, NTH($a,AllMassList:) );
+                                    sum $b;
+                                    };
+    (integer) CalculatedMass_SENS:  isBodySelected?:;
+
+    (child) MassExpression:
+    {
+      class,     if (CreateMassExpression: = 0) then NULLDESIGN # WILL NOT CREATE EXPRESSION IF NO OBJECT IS SELECTED
+                 else ug_expression;
+      Value,     CalculatedMass:;
+      LockRule?, TRUE;
+      GivenName, "Mass";
+    };
+

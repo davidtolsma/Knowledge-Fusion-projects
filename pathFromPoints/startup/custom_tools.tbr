@@ -1,0 +1,19 @@
+!
+!  Unigraphics Application Toolbar 
+!
+! 
+!
+
+TITLE   Custom Tools
+VERSION 170
+DOCK TOP
+RELOAD
+
+BUTTON PATH_FROM_POINTS
+LABEL  Create Path from Points
+BITMAP rt_path_new.bmp
+
+BUTTON PATH_FROM_POINTS_HELP
+LABEL  Create Path from Points
+BITMAP Help
+

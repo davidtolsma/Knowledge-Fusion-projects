@@ -1,0 +1,165 @@
+#! UG/KF 19.0
+#
+#+
+-----------------------------------------------------------------------------
+
+    Creates and maintains NX expressions containing the following mass 
+    properties:
+    
+    Mass
+    Surface area
+    Volume
+    Density
+    
+    The class also creates part attributes containing the unit abbreviations
+    based on the calculation units. The attributes can be used to embed in a
+    UG note.
+    
+    The class is meant to be used as a child or instance of another class 
+    object. For example,
+    
+    (child) properties:
+    {
+        class, %dph_prtp_partPropertiesModel;
+        bodies, selectedBodies:;
+    };
+    
+    The selectedBodies attribute is a list of solid body instances to include
+    in the calculations. The default calculation units is grams/centimeters. 
+    You can specify different units with the units attribute. The valid
+    values are:
+    
+    Pound_And_Inches
+    Pounds_And_Feet
+    Grams_And_Centimeters
+    Kilograms_And_Meters
+    Grams_Millimeters
+    
+    For example,
+    
+    (child) properties:
+    {
+        class, %dph_prtp_partPropertiesModel;
+        bodies, selectedBodies:;
+        units, Pounds_And_Inches;
+    };
+    
+-----------------------------------------------------------------------------
+#-
+DefClass: %dph_prtp_propertyExpressions(ug_mass_props);
+        
+    (Canonical List Parameter)    features: {};
+    (canonical number parameter) unitsIndex: 0;
+
+    (name) Units: nth(unitsIndex:, Units_init:);
+   
+    # Unit attribute names - 10 characters max. due to part attribute limits(legacy?)
+    (string) massAttributeName: "MASS_UNITS";
+    (string) areaAttributeName: "AREA_UNITS";
+    (string) volumeAttributeName: "VOL_UNITS";
+    (string) densityAttributeName: "DEN_UNITS";
+
+    # Unit abbreviations
+    (list) massUnitAbbrevs: { "lb", "lb", "g", "kg", "g" };
+    (list) areaUnitAbbrevs: { "in<H>2<H>","ft<H>2<H>", "cm<H>2<H>", "m<H>2<H>", "mm<H>2<H>" };
+    (list) volumeUnitAbbrevs:{"in<H>3<H>", "ft<H>3<H>", "cm<H>3<H>","m<H>3<H>","mm<H>3<H>" };
+    (list) densityUnitAbbrevs: { "lb/in<H>3<H>", "lb/ft<H>3<H>", "g/cm<H>3<H>", "kg/m<H>3<H>","g/mm<H>3<H>" };
+
+    # Expression names
+    (string) massExpressionName: "PPMass";
+    (string) areaExpressionName: "PPSurfaceArea";
+    (string) volumeExpressionName: "PPVolume";
+    (string) densityExpressionName: "PPSolidDensity";
+
+    (list) %Mass_Properties:
+    @{
+        ug_askMassProperties(features:,Type:,Accuracy:,
+                             Tolerances:,Units:, Frame;referenceFrame:);
+    };
+          
+    #------------------------------------------------
+    # Child UG Expressions
+    #------------------------------------------------
+    (child) massExpression:
+    {
+       class,     ug_expression;
+       LockRule?, true;
+       GivenName, massExpressionName:;
+       DemandOrder, features:;
+       value, Mass:;
+    };
+    
+    (child) areaExpression:
+    {
+       class,     ug_expression;
+       LockRule?, true;
+       GivenName, areaExpressionName:;
+       DemandOrder, features:;
+       value, Surface_Area:;
+    };
+        
+    (child) densityExpression:
+    {
+       class,     ug_expression;
+       LockRule?, true;
+       GivenName, densityExpressionName:;
+       DemandOrder, features:;
+       value, Solid_Density:;
+    };
+    
+    (child) volumeExpression:
+    {
+       class,     %lockBugExpression;
+       LockRule?, true;
+       GivenName, volumeExpressionName:;
+       DemandOrder, features:;
+       # See lockBugExpression for explanation
+       myVal, Volume:;
+#       value, Volume:;
+    };
+    
+    (method boolean) setUnitAttributes:()
+    @{
+        ug_setAttrValue_("", "PART_ATTRIBUTE", massAttributeName:, nth(unitsIndex:, massUnitAbbrevs:));
+        ug_setAttrValue_("", "PART_ATTRIBUTE", areaAttributeName:, nth(unitsIndex:, areaUnitAbbrevs:));
+        ug_setAttrValue_("", "PART_ATTRIBUTE", volumeAttributeName:, nth(unitsIndex:, volumeUnitAbbrevs:));
+        ug_setAttrValue_("", "PART_ATTRIBUTE", densityAttributeName:, nth(unitsIndex:, densityUnitAbbrevs:));
+        true;
+    };
+    
+    (uncached boolean) setMaterialAttribute:
+    @{
+        # This is a hack to fix the hack with iMAN before NX2. Should
+        # keep it in until sure not needed anymore(NX3 or NX4)
+        storeValue( false, root:, saveClass? );
+#        if ug_isObjectAlive(first(features:)) then
+#            dph_prtp_set_material_name(first(features:))
+#        else
+            true;
+    };
+    
+    # Tell NX to update the material expressions during model update      
+    (list uncached modifiable) demandValue: {setMaterialAttribute:};
+            
+#-------------------------------------------------------------------------------
+
+
+Defun: dph_prtp_set_material_name( any $body, string($lib; "dph_prtp_makenote"), 
+                                   string($func_name; "DPH_PRTP_set_material_name" ))
+@{ 
+    CFunc("UF_KF_invoke_user_function", "libufun");
+} boolean;
+
+#+
+--------------------------------------------------------------------------------
+This class is a workaround to a bug in NX 3(fixed NX4). When the number in
+value attribute is an undetermined size, NX displays a bogus error about user
+can't change value. This gets about it by setting a dummy attribute and use
+demandValue to actually set the value.
+--------------------------------------------------------------------------------
+#-
+DefClass: %lockBugExpression(ug_expression);
+
+    (uncached number parameter modifiable) myVal: 0.0;
+#    (number modifiable) value: 0.0;
+    (list uncached modifiable) demandValue: {storeValue( myVal:, self:, value )};

@@ -1,0 +1,97 @@
+#! UG/KBE 17.0
+DefClass: dt_fastener (ug_base_part);
+
+# ----------------------------------------------------------------------------
+# Function: 
+#
+# Purpose:  
+#
+# Author:   Dave Tolsma
+#
+# ----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
+# EMBED THE DFA FILE IN THE UG PART
+
+#    (list Uncached) saveClassList: {dt_fastener};
+#    (boolean) saveClass?: TRUE;
+    
+# ----------------------------------------------------------------------------
+# EDIT EXISTING CLASS VIA THE MENU / TOOLBAR
+
+    (Name)   APPLY_STATE:   Edit;
+    (String) APPLY_NAME:   "dt_fastener";
+    
+# ----------------------------------------------------------------------------    
+# Hides the Instances in the KFNT
+#    (boolean) inTree?: TRUE;
+ 
+ 
+# -----USER INTERFACE INPUTS---------------------
+
+(integer Parameter) Material: 1;
+(integer) Material_VISI: 1;
+(list)    Material_LIST: {"", "Steel", "Aluminum", "Stainless Steel"};
+(integer) Material_HELP: ug_printMessage({"Material Help"});
+
+(integer Parameter) Coating: 1;
+(integer) Coating_VISI: 1;
+(list)    Coating_LIST: {"", "None", "Galvenized"};
+(integer) Coating_HELP: ug_printMessage({"Coating Help"});
+
+(integer Parameter) FastenerType: 1;
+(integer) FastenerType_VISI: 1;
+(list)    FastenerType_LIST: {"", "Bolt", "Nail", "Screw", "Nut"};
+(integer) FastenerType_HELP: ug_printMessage({"Fastener Help"});
+
+(integer Parameter) Unit: -1;
+(integer) Unit_VISI: 1;
+(list)    Unit_LIST: {"", "English", "Metric"};
+(integer) Unit_HELP: ug_printMessage({"Unit Help"});
+
+(integer Parameter) Thread: -1;
+(integer) Thread_VISI: 1;
+(list)    Thread_LIST: {"", "10-24", "10-32"};
+(integer) Thread_HELP: ug_printMessage({"Thread Help"});
+
+(integer Parameter) ThreadDirection: -1;
+(integer) ThreadDirection_VISI: 1;
+(list)    ThreadDirection_LIST: {"", "Right Hand", "Left Hand"};
+(integer) ThreadDirection_HELP: ug_printMessage({"ThreadDirection Help"});
+
+(integer Parameter) HeadType: -1;
+(integer) HeadType_VISI: 1;
+(list)    HeadType_LIST: {"", "Cap", "Button", "Socket Head", "Hex"};
+(integer) HeadType_HELP: ug_printMessage({"HeadType Help"});
+
+(integer Parameter) FastenerType: -1;
+(integer) FastenerType_VISI: 1;
+(list)    FastenerType_LIST: {"", "Hex", "Torx", "Philip", "Slot"};
+(integer) FastenerType_HELP: ug_printMessage({"FastenerType Help"});
+
+(number Parameter)  FastenerLength: 1;
+(integer) FastenerLength_VISI: 1;
+(integer) FastenerLength_HELP: ug_printMessage({"FastenerLength Help"});
+
+
+(boolean parameter) FullThread: FALSE;
+(integer) FullThread_VISI: 1;
+(integer) FullThread_HELP: ug_printMessage({"FullThread Help"});
+
+(number Parameter)  ThreadLength: 1;
+(integer) ThreadLength_VISI: 1;
+(integer) ThreadLength_HELP: ug_printMessage({"ThreadLength Help"});
+
+(integer Parameter) ThreadType: -1;
+(integer) ThreadType_VISI: 1;
+(list)    ThreadType_LIST: {"", "Cut", "Rolled", "Die"};
+(integer) ThreadType_HELP: ug_printMessage({"ThreadType Help"});
+
+(boolean Parameter) Filter: ;
+(integer) Filter_VISI: 1;
+(integer) Filter_HELP: ug_printMessage({"Filter Help"});
+
+(integer Parameter) Refined: -1;
+(integer) Refined_VISI: 1;
+(list)    Refined_LIST: {"Refined List"};
+(integer) Refined_HELP: ug_printMessage({"Refined Help"});

@@ -1,0 +1,14 @@
+Material		Steel
+Coating			Galvinized
+Type			Bolt, Nail, screw, Nut
+	Nail	Cut, Standard, 
+	Screw	Thumb, drywall, Deck
+	Nut	Standard, Lock, Captured Washer
+Units			Metric, English
+Thread			10-24
+Thread Direction	Left, Right
+Head Type		Cap, Button, Socket Head, Hex
+	Fastener Type		Hex, Torx, Philip, slot
+Fastener Length
+Thread Length		Full, 2.00
+Thread Type		Cut, Rolled

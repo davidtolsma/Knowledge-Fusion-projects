@@ -1,0 +1,57 @@
+#! UG/KBE 17.0
+DefClass: sensitive (ug_base_part);
+
+
+# SAVE THE DFA FILE IN THE UG PART
+    (list Uncached) saveClassList: {sensitive};
+
+## SENSITIVITY OF OTHER STRINGS WHEN CERTAIN BUTTONS ARE SELECTED
+(integer parameter) Radio1: 0;
+(integer parameter) A_Height: 1;
+(integer) A_Height_SENS: if Radio1:=1 then 0 else 1;
+(integer parameter) A_Width: 2;
+(integer) A_Width_SENS: if Radio1:=1 then 1 else 0;
+(string parameter) Str1:  "Hi there";
+(integer) Str1_SENS:  If Radio1:=1 then 0 else 1;
+
+(integer) metric: 1;
+(integer) english: 0;
+
+
+
+## FOR FILE SELECTION DIALOG
+(string) data: "C:\myfile.txt"; 	# THIS SETS WHAT IS DISPLAYED IN THE UI
+(string) data_file: ""; 	# THIS SETS WHAT SHOWS UP WHEN THE FILE OPEN DIALOG IS LAUNCHED
+
+## FOR GENERATION OF THE POINT SUBFUNCTION
+(point) my_point: point(1,2,3);
+
+(Point Parameter) start_point: Point(0.0,0.0,0.0);  ## NOT NEEDED UNLESS YOU WANT A TEXT AREA TO TYPE
+
+## DISPLAYS WINDOW ON SCREEN
+(integer) p_message: ug_printMessage({"Button was clicked"});
+
+
+## FOR GENERATION OF THE CSYS DIALOG
+(list) new_csys: {};
+#(frame) new_csys: {point(0,0,0),vector(1,0,0), vector(0,1,0)}; # CREATES CSYS SUBFUNCTION DIALOG
+
+
+## OPTION MENU DYNAMICALLY CREATED
+
+(integer parameter) Choice: 1;	# DEFAULTS CHOICE TO DESIRED LOCATION
+
+(list parameter) Choice_List: {"ONE", "TWO", "THREE" , "FOUR"}; # WHATS IN THE LIST
+
+## ERROR MESSAGE
+
+(any) my_error: ug_error("MY ERROR", "THIS IS ONLY AN ERROR");
+
+## Creates a new part in Metric Units in Quiet Mode
+(any) create_new_prt: ug_createNewPart("erase", 1);
+
+## CHECKS IF YOUR CURRENTLY IN UGMANAGER MODE FALSE OR TRUE
+(boolean) active_state: ug_isUGManagerActive();
+
+## Only returns info if your in UGMANAGER MODE
+(list) file_name: if active_state: = TRUE then ug_askUGManagerFileSpec( ) else NULLDESIGN;

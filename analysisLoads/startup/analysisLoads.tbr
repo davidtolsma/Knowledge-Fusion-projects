@@ -1,0 +1,16 @@
+!
+!  Unigraphics Application Toolbar 
+!
+! 
+!
+
+TITLE   Analysis Loads
+VERSION 170
+DOCK TOP
+RELOAD
+
+BUTTON ANALYSIS_LOADS
+LABEL  Analysis Loads
+BITMAP loads
+
+

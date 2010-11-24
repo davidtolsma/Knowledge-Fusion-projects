@@ -1,0 +1,30 @@
+#! UG/KF 17.0
+
+DefClass: tba_combined_centroid (ug_base_part);
+
+# ----- Have the user select the bodies
+
+(Parameter uncached List)  sel_bodies: {};
+(List)          				sel_bodies_Mask: { Solid };
+
+# ----- Adopt all of the selected bodies
+
+(list) adopted_bodies:
+	loop  {
+		for $H from 1 to length(sel_bodies:) by 1; 
+		collect ug_adoptObject( nth($H,sel_bodies:) );
+	};
+
+# ----- Create combined mass properties for the list of bodies
+
+(Child) combined_properties: {
+ Class, ug_mass_properties; 
+ features, adopted_bodies:; 
+}; 
+
+# ----- Create a point at the combined centroid
+
+(Child) centroid_point: {  
+	Class; 			ug_point;
+	position; 		combined_properties:centroid:;
+};

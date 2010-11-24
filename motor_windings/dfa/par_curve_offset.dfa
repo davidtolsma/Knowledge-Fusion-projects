@@ -1,0 +1,265 @@
+#! UG/KBE 17.0
+
+# ----------------------------------------------------------------------------
+# Function: Creates one loop and solid
+#
+# Purpose:  Create single motor winding
+#
+# Author:   Dave Tolsma
+#
+# ----------------------------------------------------------------------------
+#
+#   DATE    CHG  SYSTEM ENGINEER         DESCRIPTION            
+#  ______   ___  ______________________ _______________________________
+#  15SE02   000  David A. Tolsma	 INITIAL RELEASE v1.0
+#  
+#
+# ----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
+# EMBED THE DFA FILE IN THE UG PART
+   (list Uncached) saveClassList: {par_curve_offset};
+   (boolean) saveClass?: TRUE;
+
+# ----------------------------------------------------------------------------   
+DefClass: par_curve_offset (ug_base_part);
+  (number parameter) Lth:        50.0;
+  (number parameter) Wth:        30.0;
+  (number parameter) Fillet_rad:  5;
+  (number parameter) start_x:       0;
+  (number parameter) start_y:       0;
+  (number parameter) start_z:       0;
+  (number parameter) cable_dia:     1;
+  (integer parameter) guide_c_layer:  10;
+  (integer parameter) section_c_layer:  10;
+  (integer parameter) s_layer:  1;
+  (point) PointOnSide: point(10,-10,start_z:);
+
+  (number) OffsetDistance: cable_dia:;
+  (integer parameter) OffsetQuantity: 5;
+  (point) P1: ug_curve_askStartPoint(Line_1:);
+  (point) P2: ug_curve_askEndPoint(Line_1:);
+  (point) P3: ug_curve_askStartPoint(Line_2:);
+  (point) P4: ug_curve_askEndPoint(Line_2:);
+  (point) P5: ug_curve_askStartPoint(Line_3:);
+  (point) P6: ug_curve_askEndPoint(Line_3:);
+  (point) P7: ug_curve_askStartPoint(Line_4:);
+  (point) P8: ug_curve_askEndPoint(Line_4:);
+  (vector) v1: P2: - P1:;
+  (vector) v2: PointOnSide: - P1:;
+  (vector) v3: P4: - P3:;
+  (vector) v4: PointOnSide: - P3:;
+  (vector) v5: P6: - P5:;
+  (vector) v6: PointOnSide: - P5:;
+  (vector) v7: P8: - P7:;
+  (vector) v8: PointOnSide: - P7:;
+  (vector) Norm: V2: * V1:;
+  (vector) OffsetVector_1: OffsetDistance: * unitize(V1: * Norm:);
+  (vector) OffsetVector_2: OffsetDistance: * unitize(V3: * Norm:);
+  (vector) OffsetVector_3: OffsetDistance: * unitize(V5: * Norm:);
+  (vector) OffsetVector_4: OffsetDistance: * unitize(V7: * Norm:);
+  
+  
+(child) Line_1:
+{
+  class, ug_line,
+  start_point, point(start_x:+Fillet_rad:,start_y:, start_z:),
+  end_point, point(start_x:+lth:-Fillet_rad:+cable_dia:,start_y:,start_z:),
+  layer, section_c_layer:,
+};
+
+(child list) O_Line_1:
+{
+  class, ug_line,
+  quantity, OffsetQuantity:-1,
+  start_point, P1: + (Child:Index: * OffsetVector_1:),
+  end_point, P2: + (Child:Index: * OffsetVector_1:),
+  layer, section_c_layer:,
+};
+  
+  
+(child) Arc_1:
+{
+  class, ug_arc,
+  radius, Fillet_rad:,
+  start_angle, (270),
+  end_angle, (360),
+  center, Point(start_x:+Lth:-Fillet_rad:+cable_dia:,start_y:+Fillet_rad:,start_z:);
+  layer, section_c_layer:,
+};
+
+(child list) O_Arc_1:
+{
+  class, ug_arc,
+  quantity, OffsetQuantity:-1,
+  radius, Fillet_rad:+(Child:Index:*OffsetDistance:),
+  start_angle, (270);
+  end_angle, (360);
+  center, Point(start_x:+Lth:-Fillet_rad:+cable_dia:,start_y:+Fillet_rad:,start_z:);
+  layer, section_c_layer:,
+};
+  
+(child) Line_2:
+{
+  class, ug_line;
+  Start_Point, Point(start_x:+Lth:+cable_dia:,start_y:+Fillet_rad:,start_z:);
+  End_Point, Point(start_x:+Lth:+cable_dia:,start_y:+Wth:-Fillet_rad:+cable_dia:,start_z:);
+  layer, section_c_layer:,
+};
+
+(child list) O_Line_2:
+{
+  class, ug_line,
+  quantity, OffsetQuantity:-1,
+  start_point, P3: + (Child:Index: * OffsetVector_2:),
+  end_point, P4: + (Child:Index: * OffsetVector_2:),
+  layer, section_c_layer:,
+};
+  
+(child) Arc_2:
+{
+  class, ug_arc,
+  radius, Fillet_rad:,
+  start_angle, (0);
+  end_angle, (90);
+  center, Point(start_x:+Lth:-Fillet_rad:+cable_dia:,start_y:+Wth:-Fillet_rad:+cable_dia:,start_z:);
+  layer, section_c_layer:,
+};  
+
+(child list) O_Arc_2:
+{
+  class, ug_arc,
+  quantity, OffsetQuantity:-1,
+  radius, Fillet_rad:+(Child:Index:*OffsetDistance:),
+  start_angle, (0);
+  end_angle, (90);
+  center, Point(start_x:+Lth:-Fillet_rad:+cable_dia:,start_y:+Wth:-Fillet_rad:+cable_dia:,start_z:);
+  layer, section_c_layer:,
+};
+
+(child) Line_3:
+{
+  class, ug_line;
+  Start_Point, Point(start_x:+Lth:-Fillet_rad:+cable_dia:,start_y:+Wth:+cable_dia:,start_z:);
+  End_Point, Point(start_x:+Fillet_rad:,start_y:+Wth:+cable_dia:,start_z:);
+  layer, section_c_layer:,
+};
+
+(child list) O_Line_3:
+{
+  class, ug_line,
+  quantity, OffsetQuantity:-1,
+  start_point, P5: + (Child:Index: * OffsetVector_3:),
+  end_point, P6: + (Child:Index: * OffsetVector_3:),
+  layer, section_c_layer:,
+};
+  
+(child) Arc_3:
+{
+  class, ug_arc,
+  radius, Fillet_rad:,
+  start_angle, (90);
+  end_angle, (180);
+  center, Point(start_x:+Fillet_rad:,start_y:+Wth:-Fillet_rad:+cable_dia:,start_z:);
+  layer, section_c_layer:,
+};
+
+(child list) O_Arc_3:
+{
+  class, ug_arc,
+  quantity, OffsetQuantity:-1,
+  radius, Fillet_rad:+(Child:Index:*OffsetDistance:),
+  start_angle, (90);
+  end_angle, (180);
+  center, Point(start_x:+Fillet_rad:,start_y:+Wth:-Fillet_rad:+cable_dia:,start_z:);
+  layer, section_c_layer:,
+};
+    
+(child) Line_4:
+{
+  class, ug_line;
+  Start_Point, Point(start_x:,start_y:+Wth:-Fillet_rad:+cable_dia:,start_z:);
+  End_Point, Point(start_x:,start_y:+Fillet_rad:,start_z:);
+  layer, section_c_layer:,
+};
+
+(child list) O_Line_4:
+{
+  class, ug_line,
+  quantity, OffsetQuantity:-1,
+  start_point, P7: + (Child:Index: * OffsetVector_4:),
+  end_point, P8: + (Child:Index: * OffsetVector_4:),
+  layer, section_c_layer:,
+};
+  
+(child) Arc_4:
+{
+  class, ug_arc,
+  radius, Fillet_rad:,
+  start_angle, (180);
+  end_angle, (270);
+  center, Point(start_x:+Fillet_rad:,start_y:+Fillet_rad:,start_z:);
+  layer, section_c_layer:,
+};
+
+(child list) O_Arc_4:
+{
+  class, ug_arc,
+  quantity, OffsetQuantity:-1,
+  radius, Fillet_rad:+(Child:Index:*OffsetDistance:),
+  start_angle, (180);
+  end_angle, (270);
+  center, Point(start_x:+Fillet_rad:,start_y:+Fillet_rad:,start_z:);
+  layer, section_c_layer:,
+};
+  
+(child) cable_curve:
+{
+  class, ug_arc;
+  radius, cable_dia:/2;
+  center, Point(start_x:+Fillet_rad:,start_y:,start_z:);
+  X_Axis, Vector(0,1,0);
+  Y_Axis, Vector(0,0,1);  
+  layer, guide_c_layer:,
+};
+
+(child list) O_cable_curve:
+{
+  class, ug_arc;
+  quantity, OffsetQuantity:-1,
+  radius, cable_dia:/2;
+  center, Point(start_x:+Fillet_rad:,start_y:-(Child:Index:*OffsetDistance:),start_z:);
+  X_Axis, Vector(0,1,0);
+  Y_Axis, Vector(0,0,1);  
+  layer, guide_c_layer:,
+};
+  
+(child) cable_solid:
+{
+  class, ug_swept;
+  Guide, {{Forward,Line_1:,Arc_1:,Line_2:,Arc_2:,line_3:,Arc_3:,line_4:,Arc_4:}};
+  Section, {{Forward,cable_curve:}};
+  Orientation, {Orientation_Fixed};
+  Scaling, {Scale_Constant,1};
+  layer, s_layer:,
+};
+
+(child list) O_cable_solid:
+{
+  class, ug_swept;
+  quantity, OffsetQuantity:-1,
+  Guide, {{Forward,
+             nth(child:index:,O_Line_1:),
+             nth(child:index:,O_Arc_1:),
+             nth(child:index:,O_Line_2:),
+             nth(child:index:,O_Arc_2:),
+             nth(child:index:,O_line_3:),
+             nth(child:index:,O_Arc_3:),
+             nth(child:index:,O_line_4:),
+             nth(child:index:,O_arc_4:)
+           }};
+  Section, {{Forward,nth(child:index:,O_cable_curve:)}};
+  Orientation, {Orientation_Fixed};
+  Scaling, {Scale_Constant,1};
+  layer, s_layer:,
+};

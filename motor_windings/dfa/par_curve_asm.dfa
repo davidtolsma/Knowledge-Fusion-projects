@@ -1,0 +1,147 @@
+#! UG/KBE 17.0
+DefClass: par_curve_asm (ug_base_part);
+
+
+# ----------------------------------------------------------------------------
+# Function: Instantiates the par_curve_offset class
+#
+# Purpose:  Create multiple motor windings
+#
+# Author:   Dave Tolsma
+#
+# ----------------------------------------------------------------------------
+#
+#   DATE    CHG  SYSTEM ENGINEER         DESCRIPTION            
+#  ______   ___  ______________________ _______________________________
+#  15SE02   000  David A. Tolsma	 INITIAL RELEASE v1.0
+#  
+#
+# ----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
+# EMBED THE DFA FILE IN THE UG PART
+   (list Uncached) saveClassList: {par_curve_asm};
+   (boolean) saveClass?: TRUE;
+
+# ----------------------------------------------------------------------------
+# PARAMETERS   
+   
+   (integer parameter) z_quant:       5;
+   (number  parameter) cable_d:       2;
+   (number  parameter) x_loc:         0;
+   (number  parameter) y_loc:         0;
+   (number  parameter) z_loc:         0;
+   (number  parameter) f_rad:         5;
+   (number  parameter) x_length:      50;
+   (number  parameter) y_length:      30;
+   (integer parameter) xy_quant:      4;
+   (integer parameter) guide_layer:   10;
+   (integer parameter) section_layer: 15;
+   (integer parameter) sol_layer:     1;
+
+# ----------------------------------------------------------------------------
+# 
+
+(child list) z_coils:
+{
+ class,           par_curve_offset,
+ quantity,        ceiling(Z_QUANTITY:VALUE:),
+ start_z,         child:index: * CABLE_DIA:VALUE:,
+ cable_dia,       CABLE_DIA:VALUE:,
+ start_x,         X_LOCATION:VALUE:,
+ start_y,         Y_LOCATION:VALUE:,
+ start_z,         Z_LOCATION:VALUE:,
+ Fillet_rad,      FILLET_RAD:VALUE:,
+ Lth,             LENGTH_X:VALUE:,
+ Wth,             LENGTH_Y:VALUE:,
+ OffsetQuantity,  XY_QUANTITY:VALUE:,
+ curve_layer,     CURVE_LAYER:VALUE:;
+ solid_layer,     SOLID_LAYER:VALUE:;
+ guide_c_layer,   GUIDE_CURVE_LAYER:VALUE:;
+ section_c_layer, SECTION_CURVE_LAYER:VALUE:;
+ s_layer,         SOLID_LAYER:VALUE:;
+};
+
+(child) X_LOCATION:
+{
+  class,  ug_expression;
+  Value, x_loc:;
+  GivenName, "XLocation";
+};
+
+(child) Y_LOCATION:
+{
+  class,  ug_expression;
+  Value, y_loc:;
+  GivenName, "YLocation";
+};
+
+(child) Z_LOCATION:
+{
+  class,  ug_expression;
+  Value, z_loc:;
+  GivenName, "ZLocation";
+};
+
+(child) CABLE_DIA:
+{
+  class,  ug_expression;
+  Value, cable_d:;
+  GivenName, "CableDIA";
+};
+
+(child) FILLET_RAD:
+{
+  class,  ug_expression;
+  Value, f_rad:;
+  GivenName, "FilletRAD";
+};
+
+(child) LENGTH_X:
+{
+  class,  ug_expression;
+  Value, x_length:;
+  GivenName, "LengthX";
+};
+
+(child) LENGTH_Y:
+{
+  class,  ug_expression;
+  Value, y_length:;
+  GivenName, "LengthY";
+};
+
+(child) Z_QUANTITY:
+{
+  class,  ug_expression;
+  Value, z_quant:;
+  GivenName, "ZQuantity";
+};
+
+(child) XY_QUANTITY:
+{
+  class,  ug_expression;
+  Value, xy_quant:;
+  GivenName, "XYQuantity";
+};
+
+(child) SECTION_CURVE_LAYER:
+{
+  class,  ug_expression;
+  Value, section_layer:;
+  GivenName, "SectionCurveLayer"; 
+};
+
+(child) GUIDE_CURVE_LAYER:
+{
+  class,  ug_expression;
+  Value, guide_layer:;
+  GivenName, "GuideCurveLayer"; 
+};
+
+(child) SOLID_LAYER:
+{
+  class,  ug_expression;
+  Value, sol_layer:;
+  GivenName, "SolidLayer"; 
+};

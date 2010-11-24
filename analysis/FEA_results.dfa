@@ -1,0 +1,88 @@
+#! UG/KF 17.0
+
+DefClass: FEA_results (ug_base_part);
+
+
+(Child) KF_scenario3: 
+ {
+  Class; ug_scenario_result;
+  # Name of the scenario that you want results from
+  Scenario_Name; KF_scenario3; 
+ #+
+       Scenario result request data
+       List of lists, each list with the following 
+       {
+         Type,
+         Layer,
+         Component,
+         Location_Name,
+         Scope,
+       }
+       where:
+         Type          Type of Result you want.  Valid settings:
+                           Displacement, Rotation, Stress, Strain,
+                           StrainEnergy 
+         Layer         Layer where you want the result.  Used mostly
+                       for beam and shell models.  Valid settings:
+                           ShellMiddle, ShellTop, ShellBottom, Minimum,
+                           Maximum, BeamStressRecoveryPointC,
+                           BeamStressRecoveryPointD, BeamStressRecoveryPointE,
+                           BeamStressRecoveryPointF
+         Component     Component of the result you want.  Valid settings:
+                           Scalar, X, Y, Z, XX, YY, ZZ, XY, YZ, ZX, Magnitude,
+                           Determinant, Mean, MaxShear, MinPrincipal,
+                           MaxPrincipal, MidPrincipal, Octahedral, VonMises
+         Location_Name Name of a section of geometry of the model.  If EMPTY, 
+                       global results will be used for the model.  Use 
+                       Format->Attribute...->Name in the scenario part to 
+                       name a piece of geometry.
+         Scope         Whether you want the Minimum or Maximum of the result.
+                       Valid settings:
+                           Minimum, Maximum
+    #-
+  Results_Data; { { Stress, ShellMiddle, VonMises, EMPTY, Maximum } };
+ }; 
+(Child) KF_scenario1_results: { Class; ug_scenario_result;
+ #+
+       Name of the scenario that you want results from
+    #-
+ Scenario_Name;KF_scenario1; 
+ #+
+       Scenario result request data
+       List of lists, each list with the following 
+       {
+         Type,
+         Layer,
+         Component,
+         Location_Name,
+         Scope,
+       }
+       where:
+         Type          Type of Result you want.  Valid settings:
+                           Displacement, Rotation, Stress, Strain,
+                           StrainEnergy 
+         Layer         Layer where you want the result.  Used mostly
+                       for beam and shell models.  Valid settings:
+                           ShellMiddle, ShellTop, ShellBottom, Minimum,
+                           Maximum, BeamStressRecoveryPointC,
+                           BeamStressRecoveryPointD, BeamStressRecoveryPointE,
+                           BeamStressRecoveryPointF
+         Component     Component of the result you want.  Valid settings:
+                           Scalar, X, Y, Z, XX, YY, ZZ, XY, YZ, ZX, Magnitude,
+                           Determinant, Mean, MaxShear, MinPrincipal,
+                           MaxPrincipal, MidPrincipal, Octahedral, VonMises
+         Location_Name Name of a section of geometry of the model.  If EMPTY, 
+                       global results will be used for the model.  Use 
+                       Format->Attribute...->Name in the scenario part to 
+                       name a piece of geometry.
+         Scope         Whether you want the Minimum or Maximum of the result.
+                       Valid settings:
+                           Minimum, Maximum
+    #-
+ Results_Data;{ { Stress, ShellMiddle, VonMises, EMPTY, Maximum } };  }; 
+(Child) KF_scenario2_results: { Class; ug_scenario_result;
+ #+
+       Name of the scenario that you want results from
+    #-
+ Scenario_Name;KF_scenario2;  }; 
+

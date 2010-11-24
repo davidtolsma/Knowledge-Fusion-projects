@@ -1,0 +1,47 @@
+#! UGNX/KF 2.0
+
+DefClass: ugsplm_defineholes (ug_base_part);
+
+(child) originPt:
+{
+    class, ugsplm_pointreference;
+};
+
+(child list) pointsToTrack:
+{
+    class, ugsplm_pointreference;
+    quantity, numberPoints:;
+    givenName, format("trackPoint%d", child:index: );
+};
+
+(integer parameter) selectedPoint: 0;
+
+(list) selectedPoint_LIST: loop
+{
+    for $inx in pointsToTrack:;
+    collect ref($inx,"givenName:");
+};
+
+(integer parameter modifiable) numberPoints: 0;
+
+(boolean) deletePoint: true;
+(instance) editPoint: nth(selectedPoint:, pointsToTrack:);
+(integer) editPoint_SENS: if ( selectedPoint: = 0 ) then 0 else 1;
+
+(list) noteText: 
+@{
+    {"HOLE           LOCATION"} +
+    loop
+    {
+        for $inx in pointsToTrack:;
+        for $nameStr is ref($inx, "givenName:");
+        for $ptStr is ug_pointToString(refMethod($inx,"distanceToOrigin:", {originPt:}));
+        collect format("%s    ", $nameStr ) + $ptStr;
+    };
+};
+
+(child) note:
+{
+    class, ug_note;
+    text, noteText:;
+};

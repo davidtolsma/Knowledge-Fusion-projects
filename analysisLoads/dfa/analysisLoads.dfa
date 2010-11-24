@@ -1,0 +1,408 @@
+#! UG/KBE 17.0
+DefClass: analysisLoads (ug_base_part);
+
+# ----------------------------------------------------------------------------
+# Function: VehicleAnalysisInformation
+#
+# Purpose:  Gets the Vehickle Load Information and creates Expression of the loads
+#
+# Author:   Dave Tolsma
+#
+# ----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
+# EMBED THE DFA FILE IN THE UG PART
+
+#    (list Uncached) saveClassList: {analysisLoads};
+#    (boolean) saveClass?: TRUE;
+    
+# ----------------------------------------------------------------------------
+# EDIT EXISTING CLASS VIA THE MENU / TOOLBAR
+
+   # (Name)   APPLY_STATE:   Edit;
+   # (String) APPLY_NAME:   "AnalysisLoads";
+    
+# ----------------------------------------------------------------------------    
+# Hides the Instances in the KFNT
+#    (boolean) inTree?: TRUE;
+ 
+ 
+# -----USER INTERFACE INPUTS---------------------
+
+
+(integer parameter) Corner: 1;
+(list)              Corner_LIST: {"Front", "Rear"};
+
+(number) GrossVehicleMass_GVM: GrossFrontVehicle_GFVM:+GrossRearVehicle_GRVM:;
+(number parameter) GrossFrontVehicle_GFVM: 1129.5;
+(number parameter) GrossRearVehicle_GRVM: 1230.5;
+(number parameter) WheelBase: 2957;
+(number parameter) TrackWidth: 1566.2;
+(number parameter) CenterOfGravityHeight: 550;
+(number parameter) SteerArmLength: 130.7;
+(number parameter) SpindleOffset: 27.21;
+(number parameter) RollRadius: 320;
+(number parameter) SpindleCoupleDistance_S1: 20;
+
+
+(integer parameter) BracketedCaliperParameters: 1;
+(list)              BracketedCaliperParameters_LIST: {"Leading", "Trailing"};
+
+(number parameter) BrakePadRadius: 134.7;
+(number parameter) BrakePadAngle_BPA: 18;
+(integer parameter) NodesAssignedFwdRevAbutment: 1;
+(number parameter) CaliperDistance_C1: -5.3;
+(number parameter) CaliperDistance_C2: 50;
+
+(integer parameter) X: 2;
+(list)              X_LIST: {"Aft","Forward"};
+(integer)           X_Sign: if (X: = 1) Then 1 Else -1;
+
+(integer parameter) Y: 1;
+(list)              Y_LIST: {"InBoard", "OutBoard"};
+(integer)           Y_Sign: if (Y: = 1) Then 1 Else -1;
+
+(integer parameter) Z: 1;
+(list)              Z_LIST: {"UP", "Down"};
+(integer)           Z_Sign: if (Y: = 1) Then 1 Else -1;
+
+
+# -----STEER ARM LOAD RESULTS-----
+(number) %inboardSteerArmBallJointCenterLoad:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN 0
+                                             ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN 0
+                                             ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN ((0.205*(2.205*GrossFrontVehicle_GFVM:)/((SteerArmLength:/25.4)/12))*4.45)*Y_Sign:
+                                             ELSE                                                         ((0.205*(2.205*GrossFrontVehicle_GFVM:)/((SteerArmLength:/25.4)/12))*4.45)*Y_Sign:;
+                                                                                                      
+(number) %outboardSteerArmBallJointCenterLoad:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN 0
+                                              ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN 0
+                                              ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN -((0.205*(2.205*GrossFrontVehicle_GFVM:)/((SteerArmLength:/25.4)/12))*4.45)*Y_Sign:
+                                              ELSE                                                         -((0.205*(2.205*GrossFrontVehicle_GFVM:)/((SteerArmLength:/25.4)/12))*4.45)*Y_Sign:;
+
+# -----MAX POTHOLE (6g/2g) RESULTS-----
+(number) %maxPotHoleForeAftSpindleCenterLoad:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN (0.5*GrossRearVehicle_GRVM:*9.81)*2*X_Sign:
+                                             ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN (0.5*GrossRearVehicle_GRVM:*9.81)*2*X_Sign:
+                                             ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN (0.5*GrossFrontVehicle_GFVM:*9.81)*2*X_Sign:
+                                             ELSE  	                                                  (0.5*GrossFrontVehicle_GFVM:*9.81)*2*X_Sign:;
+    
+(number) %maxPotHoleVerticalSpindleCenterLoad:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN (0.5*GrossRearVehicle_GRVM:*9.81)*6*Z_Sign:
+                                              ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN (0.5*GrossRearVehicle_GRVM:*9.81)*6*Z_Sign:
+                                              ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN (0.5*GrossRearVehicle_GRVM:*9.81)*6*Z_Sign:
+                                              ELSE                                                         (0.5*GrossRearVehicle_GRVM:*9.81)*6*Z_Sign:;
+
+# -----INBOARD CORNERING RESULTS-----
+(number) %inboardCorneringVerticalSpindleCenterLoad:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN (0.5*GrossRearVehicle_GRVM:*9.81)*Z_Sign:
+                                                    ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN (0.5*GrossRearVehicle_GRVM:*9.81)*Z_Sign:
+                                                    ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN (0.5*GrossFrontVehicle_GFVM:*9.81)*Z_Sign:
+                                                    ELSE                                                         (0.5*GrossFrontVehicle_GFVM:*9.81)*Z_Sign:;
+    
+(number) %inboardCorneringLateralSpindleCenterLoad:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN (6.54*GrossRearVehicle_GRVM:)*0.88*Y_Sign:
+                                                   ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN (6.54*GrossRearVehicle_GRVM:)*0.88*Y_Sign:
+                                                   ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN (6.54*GrossFrontVehicle_GFVM:)*0.88*Y_Sign:
+                                                   ELSE                                                         (6.54*GrossFrontVehicle_GFVM:)*0.88*Y_Sign:;
+
+(number) %inboardCorneringUpperSpindleCoupleForce:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN -0.5*(%inboardCorneringLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:)
+                                                  ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN -0.5*(%inboardCorneringLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:)
+                                                  ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN -0.5*(%inboardCorneringLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:)
+                                                  ELSE                                                         -0.5*(%inboardCorneringLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:);
+
+(number) %inboardCorneringLowerSpindleCoupleForce:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN 0.5*(%inboardCorneringLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:)
+                                                  ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN 0.5*(%inboardCorneringLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:)
+                                                  ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN 0.5*(%inboardCorneringLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:)
+                                                  ELSE                                                         0.5*(%inboardCorneringLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:);
+
+(number) %inboardCorneringMoment: %inboardCorneringLateralSpindleCenterLoad: * RollRadius:;
+
+
+# -----OUTBOARD Cornering-----
+(number) %outboardCorneringVerticalSpindleCenterLoad:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN (0.5*GrossRearVehicle_GRVM:*9.81)*Z_Sign:
+                                                     ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN (0.5*GrossRearVehicle_GRVM:*9.81)*Z_Sign:
+                                                     ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN (0.5*GrossFrontVehicle_GFVM:*9.81)*Z_Sign:
+                                                     ELSE                                                         (0.5*GrossFrontVehicle_GFVM:*9.81)*Z_Sign:;
+
+    
+(number) %outboardCorneringLateralSpindleCenterLoad:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN -0.88*6.54*GrossRearVehicle_GRVM:*((0.003*SpindleOffset:)+0.695)*Y_Sign:
+                                                    ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN -0.88*6.54*GrossRearVehicle_GRVM:*((0.003*SpindleOffset:)+0.695)*Y_Sign:
+                                                    ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN -0.88*6.54*GrossFrontVehicle_GFVM:*((0.003*SpindleOffset:)+0.695)*Y_Sign:
+                                                    ELSE                                                         -0.88*6.54*GrossFrontVehicle_GFVM:*((0.003*SpindleOffset:)+0.695)*Y_Sign:;
+ 
+    
+(number) %outboardCorneringUpperSpindleCoupleForce:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN -0.5*(%outboardCorneringLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:)
+                                                   ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN -0.5*(%outboardCorneringLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:)
+                                                   ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN -0.5*(%outboardCorneringLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:)
+                                                   ELSE                                                         -0.5*(%outboardCorneringLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:);
+ 
+    
+(number) %outboardCorneringLowerSpindleCoupleForce:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN 0.5*(%outboardCorneringLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:)
+                                                   ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN 0.5*(%outboardCorneringLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:)
+                                                   ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN 0.5*(%outboardCorneringLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:)
+                                                   ELSE                                                         0.5*(%outboardCorneringLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:);
+   
+(number) %outboardCorneringMoment:  -%outboardCorneringLateralSpindleCenterLoad: * RollRadius:;
+
+
+# -----INBOARD J-Turn-----
+    (number) %inboardjTurnVerticalSpindleCenterLoad:    IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN (0.5*GrossRearVehicle_GRVM:*9.81) * Z_Sign:
+                                                   ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN (0.5*GrossRearVehicle_GRVM:*9.81) * Z_Sign:
+                                                   ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN (0.5*GrossRearVehicle_GRVM:*9.81) * Z_Sign:
+                                                   ELSE                                                         (0.5*GrossRearVehicle_GRVM:*9.81) * Z_Sign:;
+
+    (number) %inboardjTurnLateralSpindleCenterLoad:    IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN (6.54*GrossRearVehicle_GRVM:)*0.88*2 * Y_Sign:
+                                                  ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN (6.54*GrossRearVehicle_GRVM:)*0.88*2 * Y_Sign:
+                                                  ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN (6.54*GrossRearVehicle_GRVM:)*0.88*2 * Y_Sign:
+                                                  ELSE                                                         (6.54*GrossRearVehicle_GRVM:)*0.88*2 * Y_Sign:;
+ 	
+    (number) %inboardjTurnUpperSpindleCoupleForce:    IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN -0.5*(%inboardjTurnLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:)
+                                                 ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN -0.5*(%inboardjTurnLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:)
+                                                 ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN -0.5*(%inboardjTurnLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:)
+                                                 ELSE                                                         -0.5*(%inboardjTurnLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:);
+	
+    (number) %inboardjTurnLowerSpindleCoupleForce:    IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN 0.5*(%inboardjTurnLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:)
+                                                 ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN 0.5*(%inboardjTurnLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:)
+                                                 ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN 0.5*(%inboardjTurnLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:)
+                                                 ELSE                                                         0.5*(%inboardjTurnLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:);
+	
+    (number) %inboardjTurnMoment: %inboardjTurnLateralSpindleCenterLoad: * RollRadius:;
+    
+
+# -----OUTBOARD J-Turn-----
+    (number) %outboardjVerticalSpindleCenterLoad:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN (0.5*GrossRearVehicle_GRVM:*9.81)* Z_Sign:
+                                                 ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN (0.5*GrossRearVehicle_GRVM:*9.81)* Z_Sign:
+                                                 ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN (0.5*GrossFrontVehicle_GFVM:*9.81)* Z_Sign:
+                                                 ELSE                                                         (0.5*GrossFrontVehicle_GFVM:*9.81)* Z_Sign:;
+ 	
+    
+    (number) %outboardjLateralSpindleCenterLoad:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN -0.88*6.54*GrossRearVehicle_GRVM:*((0.003*SpindleOffset:)+0.695)*2* Y_Sign:
+                                                ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN -0.88*6.54*GrossRearVehicle_GRVM:*((0.003*SpindleOffset:)+0.695)*2* Y_Sign:
+                                                ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN -0.88*6.54*GrossFrontVehicle_GFVM:*((0.003*SpindleOffset:)+0.695)*2* Y_Sign:
+                                                ELSE                                                         -0.88*6.54*GrossFrontVehicle_GFVM:*((0.003*SpindleOffset:)+0.695)*2* Y_Sign:;
+ 
+    
+    (number) %outboardjUpperSpindleCoupleForce:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN -0.5*(%outboardjLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:)
+                                               ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN -0.5*(%outboardjLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:)
+                                               ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN -0.5*(%outboardjLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:)
+                                               ELSE                                                         -0.5*(%outboardjLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:);
+ 
+    
+    (number) %outboardjLowerSpindleCoupleForce:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN 0.5*(%outboardjLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:)
+                                               ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN 0.5*(%outboardjLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:)
+                                               ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN 0.5*(%outboardjLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:)
+                                               ELSE                                                         0.5*(%outboardjLateralSpindleCenterLoad:*RollRadius:/SpindleCoupleDistance_S1:);
+ 
+    
+    (number) %outboardjTurnMoment: %outboardjLateralSpindleCenterLoad: * RollRadius:;
+     
+     
+# -----FORWARD Braking PHASE 2-----
+
+    (number) %forwardBrakingForeAftTirePatchLoad:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN ABS(0.8*%forwardBrakingVerticalTirePatchLoad:)* X_Sign:
+                                                 ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN ABS(0.8*%forwardBrakingVerticalTirePatchLoad:)* X_Sign:
+                                                 ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN ABS(0.8*%forwardBrakingVerticalTirePatchLoad:)* X_Sign:
+                                                 ELSE                                                         ABS(0.8*%forwardBrakingVerticalTirePatchLoad:)* X_Sign:;
+    
+    (number) %forwardBrakingVerticalTirePatchLoad:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN 0.5*(GrossRearVehicle_GRVM:-(GrossVehicleMass_GVM:*0.8*CenterOfGravityHeight:/WheelBase:))*9.81* Z_Sign:
+                                                  ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN 0.5*(GrossRearVehicle_GRVM:-(GrossVehicleMass_GVM:*0.8*CenterOfGravityHeight:/WheelBase:))*9.81* Z_Sign:
+                                                  ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN 0.5*(GrossFrontVehicle_GFVM:+(GrossVehicleMass_GVM:*0.8*CenterOfGravityHeight:/WheelBase:))*9.81* Z_Sign:
+                                                  ELSE                                                         0.5*(GrossFrontVehicle_GFVM:+(GrossVehicleMass_GVM:*0.8*CenterOfGravityHeight:/WheelBase:))*9.81* Z_Sign:;
+
+    # FORCE AT PAD CENTER
+    (number) %forwardBrakingForcePadCenter:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN ABS(1/BrakePadRadius:*(%forwardBrakingForeAftTirePatchLoad:*RollRadius:))
+                                           ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN ABS(1/BrakePadRadius:*(%forwardBrakingForeAftTirePatchLoad:*RollRadius:))
+                                           ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN ABS(1/BrakePadRadius:*(%forwardBrakingForeAftTirePatchLoad:*RollRadius:))
+                                           ELSE                                                         ABS(1/BrakePadRadius:*(%forwardBrakingForeAftTirePatchLoad:*RollRadius:));
+
+    (number)  %forwardBrakingPadCenterForeAft:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN SIN(BrakePadAngle_BPA:)*%forwardBrakingForcePadCenter:
+                                              ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN -SIN(BrakePadAngle_BPA:)*%forwardBrakingForcePadCenter:
+                                              ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN SIN(BrakePadAngle_BPA:)*%forwardBrakingForcePadCenter:* X_Sign:
+                                              ELSE                                                         SIN(BrakePadAngle_BPA:)*%forwardBrakingForcePadCenter:* X_Sign:;
+
+    (number)  %forwardBrakingPadCenterVertical:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN -COS(BrakePadAngle_BPA:)*%forwardBrakingForcePadCenter:
+                                               ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN COS(BrakePadAngle_BPA:)*%forwardBrakingForcePadCenter:
+                                               ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN -COS(BrakePadAngle_BPA:)*%forwardBrakingForcePadCenter:* Z_Sign:
+                                               ELSE                                                         COS(BrakePadAngle_BPA:)*%forwardBrakingForcePadCenter:* Z_Sign:;
+    
+    # -----FORCE AT SPINDLE CENTER-----
+    (number)  %forwardBrakingPadCenterCoupling:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN %forwardBrakingForcePadCenter:*CaliperDistance_C1:/2/CaliperDistance_C2:
+                                               ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN %forwardBrakingForcePadCenter:*CaliperDistance_C1:/2/CaliperDistance_C2:
+                                               ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN %forwardBrakingForcePadCenter:*CaliperDistance_C1:/2/CaliperDistance_C2:
+                                               ELSE                                                         %forwardBrakingForcePadCenter:*CaliperDistance_C1:/2/CaliperDistance_C2:;
+
+    # FORCE AT SPINDLE CENTER
+    (number)  %forwardBrakingSpindleCenterForeAft:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN %forwardBrakingForeAftTirePatchLoad:-%forwardBrakingPadCenterForeAft:
+                                                  ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN %forwardBrakingForeAftTirePatchLoad:-%forwardBrakingPadCenterForeAft:
+                                                  ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN %forwardBrakingForeAftTirePatchLoad:-%forwardBrakingPadCenterForeAft:
+                                                  ELSE                                                         %forwardBrakingForeAftTirePatchLoad:-%forwardBrakingPadCenterForeAft:;
+    
+    (number)  %forwardBrakingSpindleCenterVertical:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN %forwardBrakingVerticalTirePatchLoad:-%forwardBrakingPadCenterVertical:
+                                                   ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN %forwardBrakingVerticalTirePatchLoad:-%forwardBrakingPadCenterVertical:
+                                                   ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN %forwardBrakingVerticalTirePatchLoad:-%forwardBrakingPadCenterVertical:
+                                                   ELSE                                                         %forwardBrakingVerticalTirePatchLoad:-%forwardBrakingPadCenterVertical:;
+
+    # CALIPER FORCE
+
+    (number)  %forwardBrakingSpindleCenterForeAftUpperAbutment:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN -COS(BrakePadAngle_BPA:)*%forwardBrakingSpindleCenterCaliperCoupleForce:* X_Sign:
+                                                               ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN -COS(BrakePadAngle_BPA:)*%forwardBrakingSpindleCenterCaliperCoupleForce:* X_Sign:
+                                                               ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN -COS(BrakePadAngle_BPA:)*%forwardBrakingSpindleCenterCaliperCoupleForce:* X_Sign:
+                                                               ELSE                                                         -COS(BrakePadAngle_BPA:)*%forwardBrakingSpindleCenterCaliperCoupleForce:* X_Sign:;
+
+    (number)  %forwardBrakingSpindleCenterVerticalUpperAbutment:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN -SIN(BrakePadAngle_BPA:)*%forwardBrakingSpindleCenterCaliperCoupleForce:* Z_Sign:
+                                                                ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN SIN(BrakePadAngle_BPA:)*%forwardBrakingSpindleCenterCaliperCoupleForce:* Z_Sign:
+                                                                ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN -SIN(BrakePadAngle_BPA:)*%forwardBrakingSpindleCenterCaliperCoupleForce:* Z_Sign:
+                                                                ELSE                                                         SIN(BrakePadAngle_BPA:)*%forwardBrakingSpindleCenterCaliperCoupleForce:* Z_Sign:;
+
+    (number)  %forwardBrakingSpindleCenterForeAftLowerAbutment:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN COS(BrakePadAngle_BPA:)*%forwardBrakingSpindleCenterCaliperCoupleForce:* X_Sign:
+                                                               ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN COS(BrakePadAngle_BPA:)*%forwardBrakingSpindleCenterCaliperCoupleForce:* X_Sign:
+                                                               ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN COS(BrakePadAngle_BPA:)*%forwardBrakingSpindleCenterCaliperCoupleForce:* X_Sign:
+                                                               ELSE                                                         COS(BrakePadAngle_BPA:)*%forwardBrakingSpindleCenterCaliperCoupleForce:* X_Sign:;
+
+    (number)  %forwardBrakingSpindleCenterVerticalLowerAbutment:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN SIN(BrakePadAngle_BPA:)*%forwardBrakingSpindleCenterCaliperCoupleForce:* Z_Sign:
+                                                                ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN -SIN(BrakePadAngle_BPA:)*%forwardBrakingSpindleCenterCaliperCoupleForce:* Z_Sign:
+                                                                ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN SIN(BrakePadAngle_BPA:)*%forwardBrakingSpindleCenterCaliperCoupleForce:* Z_Sign:
+                                                                ELSE                                                         -SIN(BrakePadAngle_BPA:)*%forwardBrakingSpindleCenterCaliperCoupleForce:* Z_Sign:;
+
+# ----------------------------------------
+#                                                      IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN 
+#                                                 ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN 
+#                                                 ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN 
+#                                                 ELSE                                                         ;
+# ----------------------------------------    
+
+
+# -----FORWARD PANIC Braking-----
+    (number)  %forwardPanicBrakingForeAftTirePatchLoad:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN =ABS(0.8*H123*2)*L122
+                                                       ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN =ABS(0.8*I123*2)*L122
+                                                       ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN =ABS(0.8*J123*2)*$L122
+                                                       ELSE                                                         =ABS(0.8*K123*2)*L122;
+
+    (number)  %forwardPanicBrakingVerticalTirePatchLoad:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN =0.5*(GRVM-(GVM*0.8*CG/WB))*9.81*L123
+                                                        ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN =0.5*(GRVM-(GVM*0.8*CG/WB))*9.81*L123
+                                                        ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN =0.5*(GFVM+(GVM*0.8*CG/WB))*9.81*$L123
+                                                        ELSE                                                         =0.5*(GFVM+(GVM*0.8*CG/WB))*9.81*$L123;
+
+    
+    # FORCE AT PAD CENTER
+    (number) %forwardPanicBrakingForcePadCenter:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN =ABS(1/BCR*(H122*RR))
+                                                ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN =ABS(1/BCR*(I122*RR))
+                                                ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN =ABS(1/BCR*(J122*RR))
+                                                ELSE                                                         =ABS(1/BCR*(K122*RR));
+
+
+    (number)  %forwardPanicBrakingPadCenterForeAft:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN =-SIN(BCA/360*2*PI())*H124*L125
+                                                   ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN =-SIN(BCA/360*2*PI())*I124*L125
+                                                   ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN =-SIN(BCA/360*2*PI())*J124*$L125
+                                                   ELSE                                                         =-SIN(BCA/360*2*PI())*K124*$L125;
+
+    (number)  %forwardPanicBrakingPadCenterVertical:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN =COS(BCA/360*2*PI())*H124*L126
+                                                    ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN =-COS(BCA/360*2*PI())*I124*L126
+                                                    ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN =COS(BCA/360*2*PI())*J124*$L126
+                                                    ELSE                                                         =-COS(BCA/360*2*PI())*K124*$L126;
+
+    (number)  %forwardPanicBrakingPadCenterCoupling:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN =H124*CONE/2/CTWO
+                                                    ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN =I124*CONE/2/CTWO
+                                                    ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN =J124*CONE/2/CTWO
+                                                    ELSE                                                         =K124*CONE/2/CTWO;
+
+    
+    # FORCE AT SPINDLE CENTER
+    (number)  %forwardPanicBrakingSpindleCenterForeAft:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN =H122-H125
+                                                       ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN =I122-I125
+                                                       ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN =J122-J125
+                                                       ELSE                                                         =K122-K125;
+
+    (number)  %forwardPanicBrakingSpindleCenterVertical:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN =H123-H126
+                                                        ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN =I123-I126
+                                                        ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN =J123-J126
+                                                        ELSE                                                         =K123-K126;
+
+    
+    # CALIPER FORCE
+
+    (number)  %forwardPanicBrakingSpindleCenterCaliperCoupleForce:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN 
+                                                                  ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN 
+                                                                  ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN 
+                                                                  ELSE                                                         ;
+
+    (number)  %forwardPanicBrakingSpindleCenterForeAftUpperAbutment:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN 
+                                                                    ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN 
+                                                                    ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN 
+                                                                    ELSE                                                         ;
+
+    (number)  %forwardPanicBrakingSpindleCenterForeAftLowerAbutment:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN 
+                                                                    ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN 
+                                                                    ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN 
+                                                                    ELSE                                                         ;
+
+    (number)  %forwardPanicBrakingSpindleCenterVerticalUpperAbutment:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN 
+                                                                     ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN 
+                                                                     ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN 
+                                                                     ELSE                                                         ;
+
+    (number)  %forwardPanicBrakingSpindleCenterVerticalLowerAbutment:     IF (Corner: = 2 & BracketedCaliperParameters: = 2) THEN 
+                                                                     ELSE IF (Corner: = 2 & BracketedCaliperParameters: = 1) THEN 
+                                                                     ELSE IF (Corner: = 1 & BracketedCaliperParameters: = 2) THEN 
+                                                                     ELSE                                                         ;
+
+        
+
+
+# -----REVERSE Braking PHASE 2-----
+    (number) %rb_fore_aft_tire_patch_load: 	-abs(0.8*%rb_vertical_tire_patch_load:)*%x:; 	# -abs(0.66*k77)*x
+    (number) %rb_vertical_tire_patch_load: 	0.5*(PLATFORM_gross_front_vehicle_gfvm:VALUE:-(PLATFORM_gross_vehicle_mass_gvm:VALUE:*0.8)*(PLATFORM_center_of_gravity_height:VALUE:/PLATFORM_wheelbase:VALUE:))*9.81*%z:; 	# 0.5*(GFVM-(GVM*1)*(CG/WB))*9.81*z
+    
+    (number) %rb_static_vertical_test_load: 	0.5*(PLATFORM_gross_front_vehicle_gfvm:VALUE:+(PLATFORM_gross_vehicle_mass_gvm:VALUE:*0.8)*(PLATFORM_center_of_gravity_height:VALUE:/PLATFORM_wheelbase:VALUE:))*9.81*%z:; 	# ABS(K77)*z
+    (number) %rb_fore_aft_test_load: 		-abs(0.8* %rb_static_vertical_test_load:)*%x:; 	# -ABS(K76)*x
+
+    # FORCE AT PAD CENTER
+    (number) %rb_pc_force_pad_center: 	abs(1/PLATFORM_brake_pad_radius_bpr:VALUE:*(%rb_fore_aft_test_load:*PLATFORM_roll_radius:VALUE:)); 	# ABS(1/BCR*(K79*RR))
+    (number)  %rb_pc_fore_aft: 		sin(PLATFORM_brake_pad_angle_bpa:VALUE:)*%rb_pc_force_pad_center:*%x:;	# SIN(BCA/360*2*PI())*K80*x
+    (number)  %rb_pc_vertical: 		default_caliper_location:*(cos(PLATFORM_brake_pad_angle_bpa:VALUE:)*%rb_pc_force_pad_center:*%z:); 	# COS(BCA/360*2*PI())*K80*z   
+    (number)  %rb_pc_coupling: 		%rb_pc_force_pad_center:*(PLATFORM_caliper_distance_c1:VALUE:)/PLATFORM_caliper_distance_c2:VALUE:; 	# E136*(D36)/D37	
+    
+    
+    # FORCE AT SPINDLE CENTER
+    (number)  %rb_sc_fore_aft: 	%rb_fore_aft_test_load:-%rb_pc_fore_aft:; 	# K79-K81
+    (number)  %rb_sc_vertical: 	%rb_static_vertical_test_load:-%rb_pc_vertical:; 	# K78-K82
+    
+    (number)  %rb_sc_caliper_couple_force: 	%rb_pc_force_pad_center:*PLATFORM_caliper_distance_c1:VALUE:/2/PLATFORM_caliper_distance_c2:VALUE:; 	# K80*CONE/2/CTWO
+    (number)  %rb_sc_fore_aft_upper_abutment: 	cos(PLATFORM_brake_pad_angle_bpa:VALUE:)*rb_sc_caliper_couple_force:*%x:; 	# COS(BCA/360*2*PI())*K86*x
+    (number)  %rb_sc_vertical_upper_abutment: 	-default_caliper_location:*(sin(PLATFORM_brake_pad_angle_bpa:VALUE:)*rb_sc_caliper_couple_force:*%z:); 	# -SIN(BCA/360*2*PI())*K86*z
+    (number)  %rb_sc_fore_aft_lower_abutment: 	-cos(PLATFORM_brake_pad_angle_bpa:VALUE:)*rb_sc_caliper_couple_force:*%x:; 	# -COS(BCA/360*2*PI())*K86*x
+    (number)  %rb_sc_vertical_lower_abutment: 	default_caliper_location:*(sin(PLATFORM_brake_pad_angle_bpa:VALUE:)*rb_sc_caliper_couple_force:*%z:); 	# SIN(BCA/360*2*PI())*K86*z
+
+
+# -----REVERSE PANIC Braking-----
+    (number) %rpb_fore_aft_tire_patch_load: 	-abs(0.5*%rpb_vertical_tire_patch_load:)*%x:; # -ABS(0.5*K137)*x
+    (number) %rpb_vertical_tire_patch_load: 	0.5*(PLATFORM_gross_front_vehicle_gfvm:VALUE:-(PLATFORM_gross_vehicle_mass_gvm:VALUE:*0.5*PLATFORM_center_of_gravity_height:VALUE:/PLATFORM_wheelbase:VALUE:))*9.81*%z:; # 0.5*(GFVM-(GVM*0.5*CG/WB))*9.81*z
+    
+    (number) %rpb_static_vertical_test_load: 	0.5*(PLATFORM_gross_front_vehicle_gfvm:VALUE:+(PLATFORM_gross_vehicle_mass_gvm:VALUE:*0.8*PLATFORM_center_of_gravity_height:VALUE:/PLATFORM_wheelbase:VALUE:))*9.81*%z:; # 0.5*(GFVM+(GVM*0.8*CG/WB))*9.81*z 
+    (number) %rpb_fore_aft_test_load: 		-abs(%rpb_fore_aft_tire_patch_load:*2)*%x:; # -ABS(K136*2)*x
+    
+    # FORCE AT PAD CENTER
+    (number)  %rpb_pc_force_pad_center: 	abs(1/PLATFORM_brake_pad_radius_bpr:VALUE:*(%rpb_fore_aft_test_load:*PLATFORM_roll_radius:VALUE:)); 	# ABS(1/BCR*(K139*RR))
+    (number)  %rpb_pc_coupling:  		%rpb_pc_force_pad_center:*(PLATFORM_caliper_distance_c1:VALUE:)/PLATFORM_caliper_distance_c2:VALUE:; 		# E188*(D36)/D37
+    (number)  %rpb_pc_fore_aft: 		sin(PLATFORM_brake_pad_angle_bpa:VALUE:)*%rpb_pc_force_pad_center:*%x:; # SIN(BCA/360*2*PI())*K140*L141
+    (number)  %rpb_pc_vertical: 		default_caliper_location:*(cos(PLATFORM_brake_pad_angle_bpa:VALUE:)*%rpb_pc_force_pad_center:*%z:); # COS(BCA/360*2*PI())*K140*L142
+    
+    # FORCE AT SPINDLE CENTER
+    (number)  %rpb_sc_fore_aft: 	%rpb_fore_aft_test_load:-%rpb_pc_fore_aft:;	 	# K139-K141
+    (number)  %rpb_sc_vertical: 	%rpb_static_vertical_test_load:-%rpb_pc_vertical:;	# K138-K142
+    
+    (number)  %rpb_sc_caliper_couple_force: 	%rpb_pc_force_pad_center:*PLATFORM_caliper_distance_c1:VALUE:/2/PLATFORM_caliper_distance_c2:VALUE:; # K140*CONE/2/CTWO
+    (number)  %rpb_sc_fore_aft_upper_abutment: 	cos(PLATFORM_brake_pad_angle_bpa:VALUE:)*%rpb_sc_caliper_couple_force: *%x:; # COS(BCA/360*2*PI())*K146*x
+    (number)  %rpb_sc_fore_aft_lower_abutment: 	-cos(PLATFORM_brake_pad_angle_bpa:VALUE:)*%rpb_sc_caliper_couple_force: *%x:; # -COS(BCA/360*2*PI())*K146*x
+    (number)  %rpb_sc_vertical_upper_abutment: 	-default_caliper_location:*(sin(PLATFORM_brake_pad_angle_bpa:VALUE:)*%rpb_sc_caliper_couple_force: *%z:); # -SIN(BCA/360*2*PI())*K146*z
+    (number)  %rpb_sc_vertical_lower_abutment: 	default_caliper_location:*(sin(PLATFORM_brake_pad_angle_bpa:VALUE:)*%rpb_sc_caliper_couple_force: *%z:); # SIN(BCA/360*2*PI())*K146*z
+
+
+
+
+# -----EXPORT LOADS-----
+    (integer) OutPutLoadCaseReady?: if (outPutLoadCase: = 1) & (length(loadcaseoutput_file:) > 1) then 1 else 0;
+    
+    (integer parameter) outPutLoadCase: 0;
+    
+    (string parameter)  loadcaseoutput_file:      "";
+    (integer) loadcaseoutput_file_SENS:       outPutLoadCase:;
+    (integer) loadcaseoutput_file_func_SENS:  outPutLoadCase:;
+    
+    (boolean) do_output_load_cases:       FALSE;
+    (integer) do_output_load_cases_SENS:  OutPutLoadCaseReady?:;    

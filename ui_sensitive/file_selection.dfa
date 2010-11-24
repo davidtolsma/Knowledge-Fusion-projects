@@ -1,0 +1,5 @@
+#! UG/KBE 17.0
+DefClass: file_selection (ug_base_part);
+
+(string parameter) data: ""; 	# THIS SETS WHAT IS DISPLAYED IN THE UI
+(string parameter) data_file: "C:\myfile.txt"; 	# THIS SETS WHAT SHOWS UP WHEN THE FILE OPEN DIALOG IS LAUNCHED

@@ -1,0 +1,36 @@
+#! UG/KBE 17.0
+DefClass: wizard (ug_base_part);
+
+# ----------------------------------------------------------------------------
+# Function: 
+#
+# Purpose:  
+#           
+#
+# Inputs:   
+#
+# Returns:  
+#
+# Author:   Dave Tolsma
+#
+# ----------------------------------------------------------------------------
+
+(integer) step_number:	     1;
+
+(integer) total_steps:	     5;
+(integer) total_steps_SENS:  0;
+
+(integer) current_step:      1;
+(integer) current_step_SENS: 0;
+
+(integer modifiable) previous_screen_SENS: if next_screen: = 1 then 1 else 0; # OPTION IS GREYED OUT
+(integer modifiable) previous_screen:      0;
+
+(integer modifiable) next_screen_SENS:	   if total_steps:-previous_screen: > 0 then 1 else 0; # OPTION IS AVAILABLE
+(integer parameter) next_screen:          1;
+
+(integer) done_SENS:		0; # OPTION IS GREYED OUT
+(integer) done:                 0;
+
+
+(integer) a:	if next_screen: = 1 then (step_number: = 2) else 0;

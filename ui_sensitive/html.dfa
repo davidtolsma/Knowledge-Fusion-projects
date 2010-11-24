@@ -1,0 +1,42 @@
+#! UG/KBE 17.0
+DefClass: html (ug_base_part);
+
+# ----------------------------------------------------------------------------
+# Function: Launch HTML Page
+#
+# Purpose:  When the user selects the button on the UI it launches the Help
+#           Page
+#           
+#
+# Inputs:   A URL starting with http:// or a FileName
+#           If URL does not start with http:// or file://, or www. then file://
+#           will be pre-pended to the URL.
+#
+# Returns:  integer   0=Success,  -1=Failure
+#
+# Author:   Dave Tolsma
+#
+# ----------------------------------------------------------------------------
+
+
+# EMBED THE DFA FILE IN THE UG PART
+    (list Uncached) saveClassList: {vehicle_position};
+    (boolean) saveClass?: TRUE;
+    
+
+# ----------------------------------------------------------------------------
+# DEFAULT PARAMETERS
+
+   (number parameter) aaa: 0;
+   (list) demandOrder: {bbb:};
+
+   # WHEEL CENTER
+    (any) bbb: 	if display_HTML_Page:VALUE: = 1 then DisplayHTMLPage("http://www.google.com") else NULLDESIGN;	
+    
+    
+    (child) display_HTML_Page:
+    {
+      class,  ug_expression;
+      Value, aaa:;
+      GivenName, "Display_HTML_Page";
+    };

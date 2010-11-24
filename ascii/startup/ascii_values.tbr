@@ -1,0 +1,14 @@
+!
+!  Unigraphics Application Toolbar 
+!
+! 
+!
+
+TITLE  Ascii Value
+VERSION 170
+DOCK TOP
+RELOAD
+
+BUTTON ASCII_VALUES
+LABEL  Ascii Values
+

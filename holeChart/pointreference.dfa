@@ -1,0 +1,26 @@
+#! UGNX/KF 2.0
+
+DefClass: ugsplm_pointReference (ug_base_part);
+
+(integer parameter modifiable) type: 1;
+(point parameter modifiable) screen_pick: Point(0,0,0);
+(integer) screen_pick_VISI: if ( type: = 1 ) then 1 else 0;
+
+(list parameter modifiable) point_pick: {};
+(list) point_pick_MASK: {point};
+(list) point_pick_MODE: {simple};
+(integer) point_pick_VISI: if ( type: = 2 ) then 1 else 0;
+
+(instance) existingPoint: ug_adoptObject(nth(1,point_pick:));
+(point) position:
+@{
+    if ( type: = 1 ) then
+        screen_pick:
+    else
+        ref(existingPoint:, "position:") ;
+};
+
+(method point) distanceToOrigin:( instance $originPt )
+@{
+    Point(0,0,0) + (position: - ref($originPt, "position:"));
+};

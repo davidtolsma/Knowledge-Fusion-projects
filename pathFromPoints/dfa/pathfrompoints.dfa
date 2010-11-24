@@ -1,0 +1,305 @@
+#! UG/KBE 17.0
+DefClass: pathfrompoints(ug_base_part);
+
+# ----------------------------------------------------------------------------
+# Function:  
+#
+# Purpose:  
+#
+# Author:   Dave Tolsma
+#
+# ----------------------------------------------------------------------------
+
+
+# EMBED THE DFA FILE IN THE UG PART
+    (list Uncached) saveClassList: {path};
+    (boolean)       saveClass?:    TRUE;
+
+# ----------------------------------------------------------------------------
+# EDIT EXISTING CLASS VIA THE MENU / TOOLBAR
+
+    (Name)   APPLY_STATE:   Edit;
+    (String) APPLY_NAME:   "pathFromPoints";
+    
+# ----------------------------------------------------------------------------
+# INPUT / OUTPUT FILE
+   
+   (string) menuWidth: ""; # Controls the Width of the Menu
+
+   (boolean) ok_sens:    True; # THIS WILL TOGGLE THE OK BUTTON (SELECTABLE OR NOT)
+   (boolean) apply_sens: True; # THIS WILL TOGGLE THE APPLY BUTTON (SELECTABLE OR NOT)
+
+
+   (string parameter)   inputFileButton:      "";
+   (boolean parameter)  inputFileButton_SENS: inputFile:;
+     
+   (boolean parameter)  InputFile:      FALSE;
+   (boolean parameter)  InputFile_SENS: TRUE;
+
+   (list uncached) IOParameterList: {
+                             { "point_one",   point_oneX:,   point_oneY:,   point_oneZ:, point_one_rad: },
+                             { "point_two",   point_twoX:,   point_twoY:,   point_twoZ:, point_two_rad: },
+                             { "point_three", point_threeX:,   point_threeY:,   point_threeZ:, point_three_rad: },
+                             { "point_four",  point_fourX:,   point_fourY:,   point_fourZ:, point_four_rad: },
+                             { "point_five",  point_fiveX:,   point_fiveY:,   point_fiveZ:, point_five_rad: };
+                           };
+   (list uncached) newParameters: 
+                         @{
+                           loop
+                            {
+                              for $a in inParameters_LIST:;
+                              for $parts is splitString($a, " , ");
+                              for $pointx  is makeNumber( NTH(1,$parts) );
+                              for $pointy  is makeNumber( NTH(2,$parts) );
+                              for $pointz  is makeNumber( NTH(3,$parts) );
+                              for $radius? is makeNumber( NTH(4,$parts) );
+                              collect { $pointx , $pointy , $pointz , $radius?}; 
+                            }; 
+                          };
+   # ---------
+   # CHECKING INPUT
+   # ---------
+   
+    (list uncached) inputCheck: {
+                        length( NTH(1, newParameters:) ),
+                        length(inParameters_LIST:)
+                        };
+    
+    (list) ExistingParameterCheck: {
+			            length( NTH(1, IOParameterList:) ) - 1,
+			            length(IOParameterList:)
+                                   };
+    
+    
+    #(boolean) aaaa: if ( NTH(5, NTH(1,newParameters:) ) > 0) then FALSE else TRUE;
+    
+    (boolean uncached) isListEqual?: 
+                          @{
+                            if ( NTH(5, NTH(1,newParameters:) ) > 0) then FALSE else
+                            if ( NTH(5, NTH( length(IOParameterList:) ,newParameters:) ) > 0) then FALSE else
+                            if ( equal(inputCheck:; ExistingParameterCheck:) ) then TRUE else FALSE;
+                          };
+    
+   # ---------
+   # IMPORTING
+   # ---------
+   
+   (integer)           ImportReady?:    if (useInputData: = 1) & (length(inputData_file:) > 1) then 1 else 0;
+
+   (integer parameter) useInputData:   0;
+   
+   (string parameter uncached)  inputData_file:           "";
+   (integer uncached)           inputData_file_SENS:      useInputData:;
+   (integer uncached)           inputData_file_FUNC_SENS: useInputData:;
+   
+
+   
+     # -------
+     (integer parameter) showInParameters:      0;
+     (integer)           showInParameters_SENS: ImportReady?:;
+   
+     (integer)          inParameters:      -1;
+     (integer)          inParameters_VISI: if (ImportReady?: = 1) & (showInParameters: = 1) then 1 else 0;
+     (list uncached)    inParameters_LIST: 
+                               @{
+                                $file << OpenFile( inputData_file:, read);
+			        $data << ReadLinesFromFile($file, {});    
+                                closeFile($file);
+                                 loop
+                                 {
+                                 for $a in $data;
+                                 collect $a; 
+                                 }; 
+                                };
+
+
+
+ (list) errorMessage: {
+                        "Q1) The imported parameters do not match the current part",
+                        "A1) Please export the current part parameters for correct template",
+                        "Q2) Verify that the list of points can not end or start with a radius",
+                        "A2) Change the radii of the first and last parameter to 0"
+                       };
+ 
+
+ (boolean) doImport: 
+                  @{
+                    loop
+                    { 
+                     do if (isListEqual?: = FALSE) then ug_printMessage(errorMessage: ) else TRUE;
+                     if (isListEqual?: = FALSE) return FALSE;
+                     
+                      for $i from 1 to length(newParameters:);                  
+                      for $pointName  is NTH(1, NTH($i,IOParameterList:) ); 
+                      for $pointNameX  is $pointName + "X";
+		      for $pointNameY  is $pointName + "Y";
+                      for $pointNameZ  is $pointName + "Z";
+                      for $PointNAME   is $pointName + "_rad";
+                      
+                     for $a in  newParameters:;
+                     for $pointx    is NTH(1,$a);
+                     for $pointy    is NTH(2,$a);
+                     for $pointz    is NTH(3,$a);
+                     for $point_rad is NTH(4,$a);
+                     
+                     do StoreValue( "", self:, MakeName($pointNameX) );
+                     do StoreValue( $pointx , self:, MakeName($pointNameX) );
+                     do StoreValue( $pointy , self:, MakeName($pointNameY) );
+                     do StoreValue( $pointz , self:, MakeName($pointNameZ) );
+                     do StoreValue( $point_rad , self:, MakeName($PointNAME) );
+                     };
+                   };
+                   
+                   
+ (integer)           doImport_SENS: ImportReady?:;
+   
+   # ---------
+   # EXPORTING
+   # ---------
+   
+   (integer)           ExportReady?:    if (useExportData: = 1) & (length(outputData_file:) > 1) then 1 else 0;
+
+   (integer parameter) useExportData:   0;
+
+   (string parameter)  outputData_file:            "";
+   (integer)           outputData_file_SENS:       useExportData:;
+   (integer)           outputData_file_FUNC_SENS:  useExportData:;
+
+
+
+       # -------
+      (integer parameter) showOutParameters:      0;
+      (integer)           showOutParameters_SENS: 1;
+      
+      (integer) OutParameters:      -1;
+      (integer) OutParameters_VISI: if (showOutParameters: = 1) then 1 else 0;
+      (list)    OutParameters_LIST: loop
+                                      { 
+                                      for $i from 1 to length(IOParameterList:);
+                                      for $a in IOParameterList:;
+                                      append { format("%0.4f", NTH(2,$a) ) + " , " +  format("%0.4f", NTH(3,$a) ) + " , " +  format("%0.4f", NTH(4,$a) ) + " , " + format("%0.4f", NTH(5,$a) )}; # $expName + " = " + $expValue;    
+                                      };
+                                      
+   (boolean) doExport: 
+                               @{
+                                $file<<openfile(outputData_file:; Write);
+                                loop
+                                 {
+                                 for $i from 1 to length(IOParameterList:);
+                                 do write( NTH($i, OutParameters_LIST:) + "~n", $file );
+                                 };
+                                 $c << closefile($file);
+                                 if ($c = 0) then TRUE else FALSE; 
+                                };
+                                
+   (integer) doExport_SENS: ExportReady?:;
+   
+
+# ----------------------------------------------------------------------------
+# MODEL CREATION
+
+    (number parameter modifiable)  point_oneX:   0;
+    (number parameter modifiable)  point_oneY:   0;
+    (number parameter modifiable)  point_oneZ:   0;
+    (number parameter modifiable)  point_one_rad:   0;
+    
+    (number parameter modifiable)  point_twoX:   4;
+    (number parameter modifiable)  point_twoY:   0;
+    (number parameter modifiable)  point_twoZ:   3;
+    (number parameter modifiable)  point_two_rad:   1;
+    
+    (number parameter modifiable)  point_threeX:  4;
+    (number parameter modifiable)  point_threeY:  4;
+    (number parameter modifiable)  point_threeZ:  0;
+    (number parameter modifiable)  point_three_rad:  1;
+    
+    (number parameter modifiable)  point_fourX:  4;
+    (number parameter modifiable)  point_fourY:  20;
+    (number parameter modifiable)  point_fourZ:  0;
+    (number parameter modifiable)  point_four_rad:  1;
+    
+    (number parameter modifiable)  point_fiveX:  30;
+    (number parameter modifiable)  point_fiveY:  20;
+    (number parameter modifiable)  point_fiveZ:  0;
+    (number parameter modifiable)  point_five_rad:  0;
+    
+    
+#+    (list) children:
+                  @{
+                    loop
+                     {
+                      for $i from 1 to length(IOParameterList:);
+                      
+                      for $a in  newParameters:;
+                      for $pointx  is NTH(1,$a);
+                      for $pointy  is NTH(2,$a);
+                      for $pointz  is NTH(3,$a);
+                      for $radius? is NTH(4,$a);
+                      
+                      collect ug_createInstance(
+						{
+						 class,     ug_point;
+						 Position, Point($pointx,$pointy,$pointz );
+						}
+					       );
+						 
+                     };
+                   };
+    
+#-
+
+    (child) fillet_1:
+    {
+      class,       fillet;
+      p1,          point(point_oneX:,point_oneY:,point_oneZ:);
+      p2,          point(point_twoX:,point_twoY:,point_twoZ:);
+      p3,          point(point_threeX:,point_threeY:,point_threeZ:);
+      r,           point_two_rad:;
+    };
+    
+    (child) fillet_2:
+    {
+      class,       fillet;
+      p1,          point(point_twoX:,point_twoY:,point_twoZ:);
+      p2,          point(point_threeX:,point_threeY:,point_threeZ:);
+      p3,          point(point_fourX:,point_fourY:,point_fourZ:);
+      r,           point_three_rad:;
+    };
+ 
+    (child) fillet_3:
+    {
+      class,       fillet;
+      p1,          point(point_threeX:,point_threeY:,point_threeZ:);
+      p2,          point(point_fourX:,point_fourY:,point_fourZ:);
+      p3,          point(point_fiveX:,point_fiveY:,point_fiveZ:);
+      r,           point_four_rad:;
+    };
+
+    (child) line_1:
+    {
+      class,        ug_line;
+      Start_Point, point(point_oneX:,point_oneY:,point_oneZ:);
+      End_Point,   fillet_1:f1:;
+    };
+
+    (child) line_2:
+    {
+      class,        ug_line;
+      Start_Point, fillet_1:f2:;
+      End_Point,   fillet_2:f1:;
+    };
+    
+    (child) line_3:
+    {
+      class,        ug_line;
+      Start_Point, fillet_2:f2:;
+      End_Point,   fillet_3:f1:;
+    };
+
+    (child) line_4:
+    {
+      class,        ug_line;
+      Start_Point, fillet_3:f2:;
+      End_Point,   point(point_fiveX:,point_fiveY:,point_fiveZ:);
+    };
+

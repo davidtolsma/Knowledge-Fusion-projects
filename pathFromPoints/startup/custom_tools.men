@@ -1,0 +1,24 @@
+VERSION 120
+EDIT UG_GATEWAY_MAIN_MENUBAR
+
+
+AFTER UG_TOOLS_CUSTOMIZE
+
+  CASCADE_BUTTON CUSTOM_TOOLS
+  LABEL Custom Tools
+  
+END_OF_AFTER
+
+
+MENU CUSTOM_TOOLS
+
+  BUTTON PATH_FROM_POINTS
+  LABEL Create Path from Points
+  ACTIONS pathfrompoints.dfa
+  
+  BUTTON PATH_FROM_POINTS_HELP
+  LABEL  Help for Path from Points
+  ACTIONS "start explorer.exe http://130.175.64.235/kf/Path_From_Points/"
+  
+END_OF_MENU
+

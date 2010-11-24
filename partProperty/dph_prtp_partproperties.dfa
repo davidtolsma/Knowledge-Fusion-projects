@@ -1,0 +1,78 @@
+#! UG/KF 19.0
+#
+#+
+-----------------------------------------------------------------------------
+    
+    Handles interaction with the UI/Styler dialog to obtain the needed
+    information to create and update the NX expressions. The NX expressions
+    will hold the mass properties of the selected solid.
+    
+-----------------------------------------------------------------------------
+#-
+DefClass: dph_prtp_partProperties (ug_base_part);
+    
+    # The list of solids select by the user
+    (list parameter modifiable) selectedBody: {};
+    (list) selectedBody_MODE: {simple};
+    # Only allow solids to be selected
+    (list) selectedBody_MASK: {solid};
+    
+    # The units selected by the user to use
+    (string parameter modifiable) useUnits:  "Grams And Centimeters";
+    # The list of unit to display to the user
+    (list parameter) useUnits_LIST: {
+                                      "Pounds And Inches", 
+                                      "Pounds And Feet",
+                                      "Grams And Centimeters",
+                                      "Kilograms And Meters",
+                                      "Grams And Millimeters",
+                                    };
+
+    # The index of the currently selected units                               
+    (integer) selectedUnits: position( useUnits:, useUnits_LIST: );
+        
+    #+
+      Tell UG to create one instance of class from the toolbar and edit that instance
+      when the toolbar/menu button is selected again.
+    #-
+    (Name)   Apply_State:   Edit;
+    (String) Apply_Name:   "partProperties";
+   
+    # Only enble the OK button after solid is selected
+    (boolean) OK_Sens:  if (isBodySelected?:) then true else false;
+    (boolean) OK_CB: propertyExpressions:setUnitAttributes:();
+
+    # Is true of the user has selected a solid
+    (boolean) isBodySelected?:
+    @{
+        if empty?(selectedBody:) then
+            false
+        else if -ug_isObjectAlive(nth(1,selectedBody:)) then
+            false
+        else
+            true;
+    };
+    
+    # Shows exclamation point or checkmark based on body selection in UI
+    (string) selectedBitmap:
+    @{
+        if (isBodySelected?:) then
+            "checkgreen_sc"
+        else 
+            "exclamationred_sc";
+    };
+    
+    # Will display help information to user
+    (boolean) displayHelp:
+    @{
+        dph_displayURL( "${DSL_BASE_DIR}/docs/html/part_properties/part_properties.html" );
+    }; 
+
+       
+    (child) propertyExpressions:
+    {
+        class, %dph_prtp_propertyExpressions;
+        features, selectedBody:;
+        unitsIndex, selectedUnits:;
+    };
+    

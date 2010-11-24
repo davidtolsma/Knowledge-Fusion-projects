@@ -1,0 +1,77 @@
+#! UG/KBE 17.0
+DefClass: importpoints(ug_base_part);
+
+# ----------------------------------------------------------------------------
+# Function:  importpoints
+#
+# Purpose:  import a dat file that contains points and create the points on
+#           the screen
+#
+# Author:   Dave Tolsma
+#
+# ----------------------------------------------------------------------------
+#
+#   DATE    CHG  SYSTEM ENGINEER         DESCRIPTION            
+#  ______   ___  ______________________ _______________________________
+#  24SE02   000  David A. Tolsma	 Beta RELEASE v0.9
+#  
+#
+# ----------------------------------------------------------------------------
+
+    
+# ----------------------------------------------------------------------------
+# INPUT / OUTPUT FILE
+   
+
+   (boolean) ok_sens:    if ImportReady?:=0 then FALSE else TRUE ; # THIS WILL TOGGLE THE OK BUTTON (SELECTABLE OR NOT)
+   (boolean) apply_sens: if ImportReady?:=0 then FALSE else TRUE ; # THIS WILL TOGGLE THE APPLY BUTTON (SELECTABLE OR NOT)
+   
+   (string) version: "version 1.0";
+   
+   (string parameter uncached)  inputData_file:           "";
+   
+   (integer)           ImportReady?:    if (length(inputData_file:) > 1) then 1 else 0;
+
+
+     # -------
+     (integer parameter) showImportingPoints:      0;
+     (integer)           showImportingPoints_SENS: ImportReady?:;
+   
+     (integer)           inParameters:      -1;
+     (integer)           inParameters_VISI: if (ImportReady?: = 1) & (showImportingPoints: = 1) then 1 else 0;
+     (list uncached)     inParameters_LIST: 
+                               @{
+                                $file << OpenFile( inputData_file:, read);
+			        $data << ReadLinesFromFile($file, {});    
+                                closeFile($file);
+                                 loop
+                                 {
+                                 for $a in $data;
+                                 
+                                 collect $a; 
+                                 }; 
+                                };
+                                                           
+   (list) children: @{
+                             loop
+                              {
+                               for $i from 1 to length(inParameters_LIST:) by 1;
+                               for $a in inParameters_LIST:;
+                               for $parts is splitString($a, " ");
+                               for $pointx  is makeNumber( NTH(1,$parts) );
+                               for $pointy  is makeNumber( NTH(2,$parts) );
+                               for $pointz  is makeNumber( NTH(3,$parts) );
+                              
+                               collect ug_createInstance(
+                                                        {
+                                                         class, ug_point;
+			                                 Position, Point($pointx ,$pointy ,$pointz);
+                                                         }
+                                                        );
+                              
+                                    do if $i = length(inParameters_LIST:) then clearCachedValues( self:;) else NULLDESIGN; # This will remove the rule from the KFNT (works best in NX1) v18 requires a KFNT reload
+                                  }; 
+                              };
+                          
+                          ug_ClearCacheValue( Part $part, Name $name)
+                          

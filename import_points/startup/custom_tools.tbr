@@ -1,0 +1,19 @@
+!
+!  Unigraphics Application Toolbar 
+!
+! 
+!
+
+TITLE   Custom Tools
+VERSION 170
+DOCK TOP
+RELOAD
+
+BUTTON IMPORT_POINTS
+LABEL  Import Points from File
+BITMAP pointset
+
+BUTTON IMPORT_POINTS_HELP
+LABEL  Help for Import Points
+BITMAP Help
+

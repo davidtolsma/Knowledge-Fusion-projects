@@ -1,0 +1,77 @@
+#! UG/KBE 17.0
+DefClass: defaultValue (ug_base_part);
+
+# ----------------------------------------------------------------------------
+# Function: defaultValue
+#
+# Purpose:  Swap components depending on expression value
+#
+# Author:   Dave Tolsma
+#
+# ----------------------------------------------------------------------------
+#
+#   DATE    CHG  SYSTEM ENGINEER         DESCRIPTION            
+#  ______   ___  ______________________ _______________________________
+#  XXXX02   000  David A. Tolsma	 INITIAL RELEASE v1.0
+# 
+# ----------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------
+# EMBED THE DFA FILE IN THE UG PART
+
+    (list Uncached) saveClassList: {defaultValue};
+    (boolean) saveClass?: TRUE;
+       
+
+# ----------------------------------------------------------------------------
+# ROD TYPE LOGIC MODIFY THESE PARAMETERS
+   
+   (string) DefaultExpression: "DEFAULT_DIAMETER";
+   (string) RealExpression:    "DIAMETER";
+   
+# ----------------------------------------------------------------------------   
+   
+   (list uncached) DemandValue: {sync:, ResetDefault:, aaaaa:};
+   
+   
+   
+   (boolean) aaaaa: unbindSlot( self(), ResetDefault);
+   
+   
+# ----------------------------------------------------------------------------   
+# 
+   (any)                        DefaultExpressionHost: first(ug_RefObjectByName( DefaultExpression: ,{ug_expression},""));
+   (uncached number modifiable) DefaultExpressionValue: ug_askExpressionValue_("",DefaultExpressionHost:);
+
+   (any )                        RealExpressionHost: first(ug_RefObjectByName( RealExpression: ,{ug_expression},""));
+   (uncached number modifiable)  RealExpressionValue: ug_askExpressionValue_("",RealExpressionHost:);   
+
+
+# ----------------------------------------------------------------------------   
+   
+   
+   (number uncached modifiable) sync:  ug_setExpressionValue_("",RealExpression:  , format("%f"; DefaultExpressionValue:) );
+   
+   (number uncached)  ResetDefault: if RealExpressionValue: != DefaultExpressionValue: then ug_setExpressionValue_("", RealExpression:  , format("%f"; DefaultExpressionValue:) ) else 0;
+   
+
+  
+
+
+
+
+
+
+
+
+
+#################################
+# FUNCTION
+
+  Defun: SetValue () 
+       @{
+         ug_setExpressionValue_("",RealExpression:  , format("%f"; DefaultExpressionValue:) );
+         ug_setExpressionValue_("",RealExpression:  , format("%f"; DefaultExpressionValue:) );
+          TRUE;
+        } boolean;
